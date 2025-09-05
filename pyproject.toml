@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mnns"
+authors = [
+    {name = "Marcus Kasdorf", email = "marcus.kasdorf@ucalgary.ca"},
+]
+description = "Modelling and analyzing random nanowire networks in Python."
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.8.4",
+    "networkx>=3.1",
+    "numpy>=1.26.4",
+    "scipy>=1.13.0",
+    "Shapely>=2.0.4,<3",
+]
+dynamic = ["version"]
+
+[project.readme]
+file = "README.md"
+content-type = "test/markdown"
+
+[project.urls]
+Source = "https://github.com/marcus-k/MemNNetSim"
+
+[tool.setuptools]
+packages = ["mnns"]
+
+[tool.setuptools.dynamic]
+version = {attr = "mnns.version.__version__"}
