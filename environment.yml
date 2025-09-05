@@ -10,4 +10,4 @@ dependencies:
   - scipy=1.13.0
   - Shapely=2.0.4
   - pip:
-    - randomnwn
+    - mnns
