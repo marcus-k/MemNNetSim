@@ -1,9 +1,10 @@
 # Memristive Nanowire Network Simulator (MemNNetSim)
 
-Python package for modelling and analyzing random nanowire networks.
+Python package for modelling and analyzing random memristive nanowire networks.
 
 # Table of Contents
 * [Installation](#installation)
+* [Development](#development)
 * [Usage](#usage)
 * [Uninstallation](#uninstallation)
 
@@ -27,9 +28,9 @@ Be sure you activate the environment before using the package!
 One can use the `dev-environment.yml` file with Anaconda to create a new 
 virtual environment with all the required dependencies for development.
 
-`conda env create -n randomnwn -f dev-environment.yml`
+`conda env create -n mnns -f dev-environment.yml`
 
-This will also install the randomnwn package in editable mode (i.e. as if 
+This will also install the mnns package in editable mode (i.e. as if 
 running `pip install -e .` in the base folder).
 
 A pip version of [21.1](https://pip.pypa.io/en/latest/news/#v21-1) or greater is required.
@@ -39,8 +40,8 @@ A pip version of [21.1](https://pip.pypa.io/en/latest/news/#v21-1) or greater is
 Nanowire network objects are simply [NetworkX](https://github.com/networkx/networkx) graphs with various attributes stored in the graph, edges, and nodes.
 
 ```python
->>> import randomnwn as rnwn
->>> NWN = rnwn.create_NWN(seed=123)
+>>> import mnns
+>>> NWN = mnns.create_NWN(seed=123)
 >>> NWN
                 Type: JDA
                Wires: 750
@@ -50,12 +51,10 @@ Inner-wire junctions: None
               Length: 50.00 um (7.143 l0)
                Width: 50.00 um (7.143 l0)
         Wire Density: 0.3000 um^-2 (14.70 l0^-2)
->>> rnwn.plot_NWN(NWN)
+>>> mnns.plot_NWN(NWN)
 (<Figure size 800x600 with 1 Axes>, <AxesSubplot:>)
 ```
 ![Figure_1](https://user-images.githubusercontent.com/81660172/127204015-9f882ef5-dca3-455d-998f-424a5787b141.png)
-
-See the [wiki pages](https://github.com/Marcus-Repository/Random-NWNs/wiki) for more detail on usage.
 
 # Uninstallation
 
