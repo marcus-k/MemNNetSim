@@ -1,0 +1,24 @@
+site_name: MemNNetSim
+
+repo_url: https://github.com/marcus-k/MemNNetSim
+repo_name: marcus-k/MemNNetSim
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    
+plugins:
+  - search
+  - mkdocstrings
+
+markdown_extensions:
+  - toc:
+      permalink: true

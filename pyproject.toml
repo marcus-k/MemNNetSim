@@ -26,6 +26,19 @@ content-type = "test/markdown"
 [project.urls]
 Source = "https://github.com/marcus-k/MemNNetSim"
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ipykernel",
+    "joblib",
+    "line_profiler"
+]
+docs = [
+    "mkdocs",
+    "mkdocstrings[python]",
+    "mkdocs-material",
+]
+
 [tool.setuptools]
 packages = ["mnns"]
 
