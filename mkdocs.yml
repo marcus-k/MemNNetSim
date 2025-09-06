@@ -14,11 +14,25 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  features:
+    - search.suggest
+    - navigation.tabs
+    - navigation.tabs.sticky
     
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: numpy
+  - api-autonav:
+      modules: ["mnns"]
+      nav_section_title: Reference
 
 markdown_extensions:
   - toc:
       permalink: true
+
+nav:
+  - Home: index.md
