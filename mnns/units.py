@@ -13,7 +13,7 @@ class NWNUnits:
 
     Parameters
     ----------
-    new_units : dict, optional
+    new_units : NWNUnits or dict, optional
         Dictionary of any custom units to use. Only base units can be altered.
 
     Attributes
@@ -40,12 +40,20 @@ class NWNUnits:
     )
 
     def __init__(self, new_units: dict[str, float] = None):
-        self.units = self.default_units.copy()
-        self.update_derived_units()
+        if isinstance(new_units, NWNUnits):
+            # Copy from previous NWNUnits instance
+            self.units = new_units.units.copy()
+            self.update_derived_units()
 
-        if new_units is not None:
-            for key, value in new_units.items():
-                self[key] = value
+        else:
+            # Set default and derived units
+            self.units = self.default_units.copy()
+            self.update_derived_units()
+
+            # Update units and derived units for any new units
+            if new_units is not None:
+                for key, value in new_units.items():
+                    self[key] = value
 
     def __setitem__(self, key: str, value: float):
         if key in self.settable_units:

@@ -48,6 +48,7 @@ from .dynamics import (
 )
 
 from .units import (
+    NWNUnits,
     get_units
 )
 
