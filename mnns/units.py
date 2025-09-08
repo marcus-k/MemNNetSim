@@ -22,23 +22,32 @@ class NWNUnits:
         Dictionary of characteristic units.
     
     """
-    default_units = {           # Unit, Description
-        "v0": 1.0,              # V, Voltage
-        "Ron": 10.0,            # Ω, ON junction resistance
-        "l0": 7.0,              # μm, Wire length
-        "D0": 50.0,             # nm, Wire diameter
-        "w0": 10.0,             # nm, Junction length (2x Wire coating thickness)
-        "rho0": 22.6,           # nΩm, Wire resistivity
-        "mu0": 1e-2,            # μm^2 s^-1 V^-1, Ion mobility
-        "Roff_Ron": 160         # none, Off-On Resistance ratio
+    default_units = {
+        "v0": 1.0,
+        "Ron": 10.0,
+        "l0": 7.0,
+        "D0": 50.0,
+        "w0": 10.0,
+        "rho0": 22.6,
+        "mu0": 1e-2,
+        "Roff_Ron": 160
     }
-    settable_units = (
-        "v0", "Ron", "l0", "D0", "w0", "rho0", "mu0", "Roff_Ron"
-    )
-    not_settable_units = (
-        "i0", "t0"
-    )
+    desc = {
+        "v0": "V, Voltage",
+        "Ron": "Ω, ON Junction resistance",
+        "l0": "μm, Wire length",
+        "D0": "nm, Wire diameter",
+        "w0": "nm, Junction length (2x Wire coating thickness)",
+        "rho0": "nΩm, Wire resistivity",
+        "mu0": "μm^2 s^-1 V^-1, Ion mobility",
+        "Roff_Ron": "Off-On Resistance ratio",
+        "i0": "A, Current",
+        "t0": "μs, Time",
+    }
 
+    settable_units = ("v0", "Ron", "l0", "D0", "w0", "rho0", "mu0", "Roff_Ron")
+    not_settable_units = ("i0", "t0")
+    
     def __init__(self, new_units: dict[str, float] = None):
         if isinstance(new_units, NWNUnits):
             # Copy from previous NWNUnits instance
@@ -85,10 +94,13 @@ class NWNUnits:
         
     def __repr__(self) -> str:
         # Get max key length
-        m = max(map(len, list(self.units.keys())))
+        m1 = max(map(len, list(self.units.keys())))
+        m2 = max(map(len, list(map(str, self.units.values()))))
 
         # Create string representation
-        s = "\n".join([f"{k:>{m}}: {v}" for k, v in self.units.items()])
+        s = "\n".join(
+            [f"{k:>{m1}}: {v:<{m2}} {self.desc[k]}" for k, v in self.units.items()]
+        )
         return s
         
 
