@@ -42,6 +42,9 @@ plugins:
 markdown_extensions:
   - toc:
       permalink: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 nav:
   - Home: index.md
