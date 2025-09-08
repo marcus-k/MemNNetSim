@@ -16,8 +16,7 @@ theme:
         name: Switch to light mode
   features:
     - search.suggest
-    - navigation.tabs
-    - navigation.tabs.sticky
+    - content.code.copy
     
 plugins:
   - search
@@ -46,3 +45,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Reference

@@ -1,17 +1,11 @@
-# Welcome to MkDocs
+# Memristive Nanowire Network Simulator (MemNNetSim)
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+Python package for modelling and analyzing random memristive nanowire networks.
 
-## Commands
+## Navigation
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+* [Installation](installation.md)
+* [Usage](usage.md)
+* [Reference](reference/mnns/index.md)
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+## Citation
