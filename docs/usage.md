@@ -1,23 +1,37 @@
 # Usage
 
+Import MemNNetSim using:
+```python
+import mnns
+```
+
 ## Creating a NWN
 
 Create a NWN with the default parameters.
 ```python
->>> import mnns
->>> NWN = mnns.create_NWN()
+NWN = mnns.create_NWN()
+```
+
+Create a NWN specifying the size (length x width) and random number generator seed.
+```python
+NWN = mnns.create_NWN(size=(8, 5), seed=5)
+```
+
+Add electrodes (equipotential wires with no memristive junctions) to a NWN 
+on the left and right edges.
+```python
+mnns.add_electrodes(NWN, "left", "right")
 ```
 
 ## Units
 
-MemNNetSim performs all calculation using nondimensionalized units. Inputs
-into the various functions MemNNetSim provides as such require inputs which
-have had their units removed.
+MemNNetSim performs all calculations using nondimensionalized units. As such, 
+inputs into various MemNNetSim functions require inputs which have no units.
 
 To get the default units for the physical and electrical quantities:
 ```python
->>> units = mnns.NWNUnits()
->>> print(units)
+units = mnns.NWNUnits()
+print(units)
       v0: 1.0     V, Voltage
      Ron: 10.0    Ω, ON Junction resistance
       l0: 7.0     μm, Wire length
@@ -32,7 +46,7 @@ Roff_Ron: 160     Off-On Resistance ratio
 
 By passing a dictionary of units, one can change what the unit values are:
 ```python
->>> units = mnns.NWNUnits({"v0": 2.0})
+units = mnns.NWNUnits({"v0": 2.0})
 ```
 
 !!! note "Derived Units"
