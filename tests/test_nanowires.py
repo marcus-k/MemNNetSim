@@ -1,10 +1,11 @@
 import pytest
 from pathlib import Path
 
-from mnns import *
-from mnns.fromtext import *
+import mnns
+import mnns.fromtext
+from mnns.nanowire_network import NanowireNetwork
+import numpy as np
 import networkx as nx
-from numpy import hypot
 from collections import Counter
 
 
@@ -16,28 +17,28 @@ def NWN_benchmark_JDA():
 
     # Create nanowire network
     units = {"Ron": 20.0, "rho0": 22.63676, "D0": 60.0, "l0": 1.0}
-    NWN = create_NWN_from_txt(str(benchmark), units=units)
+    NWN = mnns.fromtext.create_NWN_from_txt(str(benchmark), units=units)
     return NWN
 
 
 @pytest.fixture
 def NWN_benchmark_MNR(NWN_benchmark_JDA):
     NWN = NWN_benchmark_JDA
-    convert_NWN_to_MNR(NWN)
+    NWN.to_MNR()
     return NWN
 
 
 @pytest.fixture
 def NWN_test1():
-    NWN = create_NWN(size=(8, 5), seed=123)
-    add_electrodes(
+    NWN = mnns.create_NWN(size=(8, 5), seed=123)
+    mnns.add_electrodes(
         NWN, ["left", 2, 1, [-0.5, 0.5]], ["right", 2, 1, [-0.5, 0.5]]
     )
     return NWN
 
 
 def test_shortest_path():
-    NWN = create_NWN(seed=123)
+    NWN = mnns.create_NWN(seed=123)
     assert NWN.graph["type"] == "JDA"
 
     path_len, path = nx.single_source_dijkstra(NWN, (33,), (138,))
@@ -55,7 +56,7 @@ def test_benchmark_network_JDA(NWN_benchmark_JDA):
 
     # Calculate JDA resistance
     V = 1.0
-    sol = solve_network(NWN, (0,), (1,), V)
+    sol = mnns.solve_network(NWN, (0,), (1,), V)
     R = V / sol[-1]
     R *= NWN.graph["units"]["Ron"]
 
@@ -72,15 +73,15 @@ def test_benchmark_network_MNR(NWN_benchmark_MNR):
 
     # Calculate MNR resistance
     V = 1.0
-    sol = solve_network(NWN, (0,), (1,), V)
+    sol = mnns.solve_network(NWN, (0,), (1,), V)
     R = V / sol[-1]
     R *= units["Ron"]
 
     # Check for the correct MNR resistance
     const = units["rho0"] / (np.pi/4 * units["D0"]**2) * 1e3
     Rin1 = const * 1.2
-    Rin2 = const * hypot(0.3, 0.3)
-    Rin3 = const * hypot(1.5, 1.5)
+    Rin2 = const * np.hypot(0.3, 0.3)
+    Rin3 = const * np.hypot(1.5, 1.5)
     Rin4 = const * 1.5
 
     R_MNR = 20 + Rin1 + 20 + Rin2 + \
@@ -90,9 +91,9 @@ def test_benchmark_network_MNR(NWN_benchmark_MNR):
 
 @pytest.mark.parametrize("NWN", ["NWN_benchmark_JDA", "NWN_test1"])
 def test_MNR_node_count(NWN, request):
-    NWN = request.getfixturevalue(NWN)
+    NWN: NanowireNetwork = request.getfixturevalue(NWN)
     assert NWN.graph["type"] == "JDA"
-    convert_NWN_to_MNR(NWN)
+    NWN.to_MNR()
 
     # Number of wire junction edges
     n_wire_junctions = Counter(nx.get_edge_attributes(NWN, "type").values())["junction"]

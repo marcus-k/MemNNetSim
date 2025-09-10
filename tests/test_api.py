@@ -1,10 +1,10 @@
 import pytest
 from pathlib import Path
 
-from mnns import *
-from mnns.fromtext import *
+import numpy as np
+import mnns
+import mnns.fromtext
 from mnns.nanowire_network import NanowireNetwork
-
 
 @pytest.fixture
 def NWN_benchmark_JDA():
@@ -14,21 +14,21 @@ def NWN_benchmark_JDA():
 
     # Create nanowire network
     units = {"Ron": 20.0, "rho0": 22.63676, "D0": 60.0, "l0": 1.0}
-    NWN = create_NWN_from_txt(str(benchmark), units=units)
+    NWN = mnns.fromtext.create_NWN_from_txt(str(benchmark), units=units)
     return NWN
 
 
 @pytest.fixture
 def NWN_benchmark_MNR(NWN_benchmark_JDA):
     NWN = NWN_benchmark_JDA
-    convert_NWN_to_MNR(NWN)
+    NWN.to_MNR()
     return NWN
 
 
 @pytest.fixture
 def NWN_test1():
-    NWN = create_NWN(size=(8, 5), seed=123)
-    add_electrodes(
+    NWN = mnns.create_NWN(size=(8, 5), seed=123)
+    mnns.add_electrodes(
         NWN, ["left", 2, 1, [-0.5, 0.5]], ["right", 2, 1, [-0.5, 0.5]]
     )
     return NWN
@@ -39,7 +39,7 @@ def test_NWN_edge_indices(NWN, request):
     NWN = request.getfixturevalue(NWN)
 
     # Get edge indices
-    start1, end1 = map(np.asarray, get_edge_indices(NWN, NWN.wire_junctions))
+    start1, end1 = map(np.asarray, mnns.get_edge_indices(NWN, NWN.wire_junctions))
     start2, end2 = np.asarray(NWN.get_index_from_edge(NWN.wire_junctions)).T
 
     # Check if the edge indices are the same
@@ -66,21 +66,24 @@ def test_new_api_evolution(NWN_input, voltage_func, window_func, request):
     NWN: NanowireNetwork = request.getfixturevalue(NWN_input)
     source, drain = NWN.electrodes
 
+    # Set NWN Parameters
     NWN.state_vars = ["w"]
     NWN.set_state_var("w", 0.05)
+    NWN.resistance_function = "linear"
 
+    args = (NWN, source, drain, voltage_func, window_func)
     sol1 = NWN.evolve(
-        "default", t_eval, source, drain, voltage_func,
-        window_func, ivp_options={"rtol": 1e-7, "atol": 1e-7}
+        mnns.models.HP_model, t_eval, args, 
+        ivp_options={"rtol": 1e-7, "atol": 1e-7}
     )
 
     # Evolution with old API
     NWN: NanowireNetwork = request.getfixturevalue(NWN_input)
     source, drain = NWN.electrodes
 
-    set_state_variables(NWN, 0.05)
+    mnns.set_state_variables(NWN, 0.05)
 
-    sol2, _ = solve_evolution(
+    sol2, _ = mnns.solve_evolution(
         NWN, t_eval, source, drain, voltage_func, window_func, 1e-7, "default"
     )
 

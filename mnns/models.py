@@ -141,33 +141,70 @@ def HP_model(
     return dxdt
 
 
-def _HP_model_no_decay(
+def decay_HP_model(
     t: float, 
-    w: npt.NDArray,
+    x: npt.NDArray,
     NWN: NanowireNetwork,
     source_node: NWNNode | list[NWNNode], 
     drain_node: NWNNode | list[NWNNode],
     voltage_func: Callable,
-    edge_list: list,
-    start_nodes: list,
-    end_nodes: list,
     window_func: Callable,
     solver: str = "spsolve",
     kwargs: dict = None
 ) -> npt.NDArray:
     """
-    Derivative of the nondimensionalized state variables `w`.
+    Decay HP Model [1]. Provides the time derivative of the state variable `x` 
+    (the dimensionless version of `w`). Assumes voltage sources are used.
+
+    Requires `NWN.graph["tau"]` to be set to the decay constant value.
+
+    Parameters
+    ----------
+    t : float
+        Current time to solve at.
+
+    x : ndarray
+        Array containing the state variable `x` for each junction in the NWN.
+
+    NWN : NanowireNetwork
+        Input nanowire network graph.
+    
+    source_node : NWNNode or list of NWNNode
+        Source node(s) of the input voltage.
+
+    drain_node : NWNNode or list of NWNNode
+        Drain/grounded node(s).
+
+    voltage_func : Callable
+        Function which inputs the time as a scalar and returns the voltage of
+        all the source nodes as a scalar.
+
+    window_func : Callable
+        Function which inputs the state variable `x` as an array and returns
+        the window function value as an array.
+
+    solver : str
+        SciPy sparse matrix equation solver. 
+
+    **kwargs
+        Keyword arguments to pass to the SciPy sparse matrix equation solver.
+
+    Returns
+    -------
+    dxdt : ndarray
+        Array of the time derivative of the state variable `x`.
+
+    References
+    ----------
+    [1] H. O. Sillin, R. Aguilera, H.-H. Shieh, A. V. Avizienis, M. Aono, 
+        A. Z. Stieg and J. K. Gimzewski, *Nanotechnology*, 2013, **24**, 384004.
 
     """
     if kwargs is None:
         kwargs = dict()
 
-    # Solve for and set resistances
-    R = resist_func(NWN, w)
-    attrs = {
-        edge: {"conductance": 1 / R[i]} for i, edge in enumerate(edge_list)   
-    }
-    nx.set_edge_attributes(NWN, attrs)
+    # Update all wire junction resistances
+    R = NWN.update_resistance(x)
 
     # Find applied voltage at the current time
     applied_V = voltage_func(t)
@@ -179,87 +216,84 @@ def _HP_model_no_decay(
     )
     V = np.array(V)
 
-    # Find voltage differences
-    v0 = V[start_nodes]
-    v1 = V[end_nodes]
-    V_delta = np.abs(v0 - v1) * np.sign(applied_V)
-        
-    # Find dw/dt
-    dwdt = V_delta / R * window_func(w)
-
-    return dwdt
-
-
-def _HP_model_decay(
-    t: float, 
-    w: npt.NDArray,
-    NWN: NanowireNetwork,
-    source_node: NWNNode | list[NWNNode], 
-    drain_node: NWNNode | list[NWNNode],
-    voltage_func: Callable,
-    edge_list: list,
-    start_nodes: list,
-    end_nodes: list,
-    window_func: Callable,
-    solver: str = "spsolve",
-    kwargs: dict = None
-) -> npt.NDArray:
-    """
-    Derivative of the nondimensionalized state variables `w` with 
-    decay value `tau`.
-
-    """
-    if kwargs is None:
-        kwargs = dict()
-
-    # Solve for and set resistances
-    R = resist_func(NWN, w)
-    attrs = {
-        edge: {"conductance": 1 / R[i]} for i, edge in enumerate(edge_list)   
-    }
-    nx.set_edge_attributes(NWN, attrs)
-
-    # Find applied voltage at the current time
-    applied_V = voltage_func(t)
-
-    # Solve for voltage at each node
-    *V, I = solve_network(
-        NWN, source_node, drain_node, applied_V, 
-        "voltage", solver, **kwargs
-    )
-    V = np.array(V)
+    # Get start and end indices
+    start, end = NWN.wire_junction_indices()
 
     # Find voltage differences
-    v0 = V[start_nodes]
-    v1 = V[end_nodes]
+    v0 = V[start]
+    v1 = V[end]
     V_delta = np.abs(v0 - v1) * np.sign(applied_V)
 
     # Get decay constant
     tau = NWN.graph["tau"]
         
     # Find dw/dt
-    dwdt = (V_delta / R * window_func(w)) - (w / tau)
+    dxdt = (V_delta / R * window_func(x)) - (x / tau)
 
-    return dwdt
+    return dxdt
 
-
-def _SLT_model(
+def SLT_HP_model(
     t: float, 
     y: npt.NDArray,
     NWN: NanowireNetwork,
     source_node: NWNNode | list[NWNNode], 
     drain_node: NWNNode | list[NWNNode],
     voltage_func: Callable,
-    edge_list: list,
-    start_nodes: list,
-    end_nodes: list,
     window_func: Callable,
     solver: str = "spsolve",
-    kwargs: dict = None
+    kwargs: Optional[dict] = None
 ) -> npt.NDArray:
     """
-    Derivative of the nondimensionalized state variables `w`, `tau`, and
-    `epsilon`.
+    SLT HP Model [1]. Provides the time derivative of the state variable `x` 
+    (the dimensionless version of `w`), `tau`, and `epsilon`. Assumes that
+    these state variable are concatenated into a single 1D array input.
+    
+    Assumes voltage sources are used.
+
+    Requires `NWN.graph["tau"]` to be set to the decay constant value.
+
+    Parameters
+    ----------
+    t : float
+        Current time to solve at.
+
+    y : ndarray
+        Array containing the state variables `x`, `tau`, and `epsilon` for each 
+        junction in the NWN concatenated into a single 1D array input.
+
+    NWN : NanowireNetwork
+        Input nanowire network graph.
+    
+    source_node : NWNNode or list of NWNNode
+        Source node(s) of the input voltage.
+
+    drain_node : NWNNode or list of NWNNode
+        Drain/grounded node(s).
+
+    voltage_func : Callable
+        Function which inputs the time as a scalar and returns the voltage of
+        all the source nodes as a scalar.
+
+    window_func : Callable
+        Function which inputs the state variable `x` as an array and returns
+        the window function value as an array.
+
+    solver : str
+        SciPy sparse matrix equation solver. 
+
+    **kwargs
+        Keyword arguments to pass to the SciPy sparse matrix equation solver.
+
+    Returns
+    -------
+    dydt : ndarray
+        Array of the time derivative of the state variables `x`, `tau`, and 
+        `epsilon`, concatenated into a 1D array.
+
+    References
+    ----------
+    [1] L. Chen, C. Li, T. Huang, H. G. Ahmad and Y. Chen, *Physics Letters A*, 
+        2014, **378**, 2924-2930
 
     """
     if kwargs is None:
@@ -269,12 +303,8 @@ def _SLT_model(
     w, tau, epsilon = np.split(y, 3)
     sigma, theta, a = NWN.graph["sigma"], NWN.graph["theta"], NWN.graph["a"]
 
-    # Solve for and set resistances
-    R = resist_func(NWN, w)
-    attrs = {
-        edge: {"conductance": 1 / R[i]} for i, edge in enumerate(edge_list)   
-    }
-    nx.set_edge_attributes(NWN, attrs)
+    # Update all wire junction resistances
+    R = NWN.update_resistance(w)
 
     # Find applied voltage at the current time
     applied_V = voltage_func(t)
@@ -284,11 +314,14 @@ def _SLT_model(
         NWN, source_node, drain_node, applied_V, 
         "voltage", solver, **kwargs
     )
-    V = np.array(V)
+    V = np.asarray(V)
+
+    # Get start and end indices
+    start, end = NWN.wire_junction_indices()
 
     # Find voltage differences
-    v0 = V[start_nodes]
-    v1 = V[end_nodes]
+    v0 = V[start]
+    v1 = V[end]
     V_delta = np.abs(v0 - v1) * np.sign(applied_V)
         
     # Find derivatives
@@ -300,13 +333,9 @@ def _SLT_model(
 
     return dydt
 
-
+# Legacy functions
 def set_SLT_params(NWN: NanowireNetwork, sigma, theta, a):
     NWN.graph["sigma"] = sigma
     NWN.graph["theta"] = theta
     NWN.graph["a"] = a
-
-
-# Legacy names
-_HP_model_chen = _SLT_model
 set_chen_params = set_SLT_params
