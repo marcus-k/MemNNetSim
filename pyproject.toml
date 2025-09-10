@@ -37,7 +37,8 @@ docs = [
     "mkdocs",
     "mkdocstrings[python]",
     "mkdocs-material",
-    "mkdocs-api-autonav"
+    "mkdocs-api-autonav",
+    "black",
 ]
 
 [tool.setuptools]
