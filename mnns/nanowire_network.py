@@ -24,7 +24,7 @@ from .typing import *
 from .units import NWNUnits
 from .line_functions import create_line, find_intersects
 from .nanowires import convert_NWN_to_MNR
-from ._models import (
+from .models import (
     resist_func,
     _HP_model_no_decay,
     _HP_model_decay,
