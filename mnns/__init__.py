@@ -52,7 +52,7 @@ from .units import (
     get_units
 )
 
-from ._models import (
+from .models import (
     set_SLT_params,
     set_chen_params,
 )

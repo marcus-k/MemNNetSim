@@ -20,7 +20,7 @@ from .typing import *
 
 from .nanowires import get_edge_indices
 from .calculations import solve_drain_current, solve_network
-from ._models import (
+from .models import (
     resist_func,
     _HP_model_no_decay,
     _HP_model_decay,

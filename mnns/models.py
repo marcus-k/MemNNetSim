@@ -19,7 +19,7 @@ import networkx as nx
 
 import numpy.typing as npt
 from .typing import *
-from typing import Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING, Optional
 if TYPE_CHECKING:
     from .nanowire_network import NanowireNetwork
 
@@ -31,11 +31,13 @@ def resist_func(
     w: float | npt.NDArray
 ) -> float | npt.NDArray:
     """
-    The HP group's resistance function in nondimensionalized form.
+    Linear resistance function in nondimensionalized form.
+
+    Obtained from Strukov et al. *Nature*, 2008, **453**, 80-83.
 
     Parameters
     ----------
-    NWN : Graph
+    NWN : NanowireNetwork
         Nanowire network.
 
     w : ndarray or scalar
@@ -50,6 +52,93 @@ def resist_func(
     Roff_Ron = NWN.graph["units"]["Roff_Ron"]
     R = w * (1 - Roff_Ron) + Roff_Ron
     return R
+
+
+def HP_model(
+    t: float, 
+    x: npt.NDArray,
+    NWN: NanowireNetwork,
+    source_node: NWNNode | list[NWNNode], 
+    drain_node: NWNNode | list[NWNNode],
+    voltage_func: Callable,
+    window_func: Callable,
+    solver: str = "spsolve",
+    kwargs: Optional[dict] = None
+) -> npt.NDArray:
+    """
+    HP Model [1]_. Provides the time derivative of the state variable `x` (the
+    dimensionless version of `w`). Assumes voltage sources are used.
+
+    Parameters
+    ----------
+    t : float
+        Current time to solve at.
+
+    x : ndarray
+        Array containing the state variable `x` for each junction in the NWN.
+
+    NWN : NanowireNetwork
+        Input nanowire network graph.
+    
+    source_node : NWNNode or list of NWNNode
+        Source node(s) of the input voltage.
+
+    drain_node : NWNNode or list of NWNNode
+        Drain/grounded node(s).
+
+    voltage_func : Callable
+        Function which inputs the time as a scalar and returns the voltage of
+        all the source nodes as a scalar.
+
+    window_func : Callable
+        Function which inputs the state variable `x` as an array and returns
+        the window function value as an array.
+
+    solver : str
+        SciPy sparse matrix equation solver. 
+
+    **kwargs
+        Keyword arguments to pass to the SciPy sparse matrix equation solver.
+
+    Returns
+    -------
+    dxdt : ndarray
+        Array of the time derivative of the state variable `x`.
+
+    References
+    ----------
+    .. [1] D. B. Strukov, G. S. Snider, D. R. Stewart and R. S. Williams, 
+           *Nature*, 2008, **453**, 80-83
+
+    """
+    if kwargs is None:
+        kwargs = dict()
+
+    # Update all wire junction resistances
+    R = NWN.update_resistance(x)
+
+    # Find applied voltage at the current time
+    applied_V = voltage_func(t)
+
+    # Solve for voltage at each node
+    *V, I = solve_network(
+        NWN, source_node, drain_node, applied_V, 
+        "voltage", solver, **kwargs
+    )
+    V = np.asarray(V)
+
+    # Get start and end indices
+    start, end = NWN.wire_junction_indices()
+
+    # Find voltage differences
+    v0 = V[start]
+    v1 = V[end]
+    V_delta = np.abs(v0 - v1) * np.sign(applied_V)
+        
+    # Find dw/dt
+    dxdt = V_delta / R * window_func(x)
+
+    return dxdt
 
 
 def _HP_model_no_decay(
