@@ -24,13 +24,7 @@ from .typing import *
 from .units import NWNUnits
 from .line_functions import create_line, find_intersects
 from .nanowires import convert_NWN_to_MNR
-from .models import (
-    resist_func,
-    _HP_model_no_decay,
-    _HP_model_decay,
-    _SLT_model,
-)
-
+from . import models
 
 class ParameterNotSetError(Exception):
     """
@@ -139,6 +133,7 @@ class NanowireNetwork(nx.Graph):
             return tuple(map(self.get_index, edge))
 
     def to_MNR(self) -> None:
+        """Converts the NWN to the multi-nodal representation (MNR)."""
         convert_NWN_to_MNR(self)
 
     @property
@@ -202,7 +197,7 @@ class NanowireNetwork(nx.Graph):
         func: str | Callable[[NanowireNetwork, npt.ArrayLike], npt.ArrayLike]
     ) -> None:
         if func == "linear":
-            self._resist_func = resist_func
+            self._resist_func = models.resist_func
         else:
             self._resist_func = func
 
@@ -344,17 +339,10 @@ class NanowireNetwork(nx.Graph):
 
     def evolve(
         self,
-        model: str | Callable,
+        model: Callable[..., npt.ArrayLike],
         t_eval: npt.NDArray,
-        source_node: NWNNode | list[NWNNode] = None,
-        drain_node: NWNNode | list[NWNNode] = None,
-        voltage_func: Callable[[npt.ArrayLike], npt.ArrayLike] = None,
-        window_func: Callable[[npt.ArrayLike], npt.ArrayLike] = None,
-        *,
-        state_vars: Optional[list[str]] = None,
         args: tuple[Any, ...] = (),
-        solver: str = "spsolve",
-        spsolve_kwargs: dict = {},
+        state_vars: Optional[list[str]] = None,
         ivp_options: dict = {},
     ) -> OdeResult:
         """
@@ -364,33 +352,15 @@ class NanowireNetwork(nx.Graph):
 
         Parameters
         ----------
-        model : str or callable
-            Model to use for the evolution. One of ["HP", "decay", "SLT"]
-            can be chosen. If a function is given, it should have the calling
+        model : callable
+            Model to use for the evolution. Should be a function with the
             signature `func(t, y, *args)` where `t` is the time, `y` is the
             state variable(s), and `args` are any additional arguments.
+            Pre-implemented models include: `mnns.models.HP_model`,
+            `mnns.models.decay_HP_model`, and `mnns.models.SLT_HP_model`.
 
         t_eval : ndarray
             Time points to evaluate the solution at.
-
-        source_node : node or list of nodes, optional
-            Source node(s) of the network. Needed if you chose one of the 
-            built-in models listed in the `model` parameter.
-
-        drain_node : node or list of nodes, optional
-            Drain node(s) of the network. Needed if you chose one of the 
-            built-in models listed in the `model` parameter.
-
-        voltage_func : callable, optional
-            Function that returns the voltage at the given time. Should have
-            the calling signature `func(t)` where `t` is the time. Needed if 
-            you chose one of the built-in models listed in the `model` 
-            parameter.
-
-        window_func : callable, optional
-            Window function for the built-in models. Should have the calling
-            signature `func(w)` where `w` is the state variable. Needed if you
-            chose one of the built-in models listed in the `model` parameter.
 
         state_vars : list of str, optional
             List of state variables to evolve. If not provided, all
@@ -401,34 +371,10 @@ class NanowireNetwork(nx.Graph):
             you will need to provide args for the source node(s), drain node(s) 
             and voltage function.
 
-        solver : str, optional
-            Sparse matrix solver function name. Defaults to "spsolve".
-
-        spsolve_kwargs : dict, optional
-            Additional keyword arguments to pass to the sparse matrix solver.
-
         ivp_options : dict, optional
             Additional keyword arguments to pass to the IVP solver.
         
-        """
-        if isinstance(model, str):
-            model = model.lower()
-
-        # Get state variable derivative function
-        impl_models = {
-            "default": _HP_model_no_decay,
-            "HP": _HP_model_no_decay,
-            "decay": _HP_model_decay,
-            "slt": _SLT_model,
-            "chen": _SLT_model
-        }
-        if model in impl_models.keys():
-            deriv = impl_models[model]
-        elif callable(model):
-            deriv = model
-        else:
-            raise NotImplementedError(f"Model '{model}' not found.")
-        
+        """        
         if state_vars is None:
             state_vars = self.state_vars
 
@@ -448,22 +394,9 @@ class NanowireNetwork(nx.Graph):
 
         t_span = (t_eval[0], t_eval[-1])
 
-        # Setup IVP args for the solver
-        if model in impl_models.keys():
-            edge_list = self.wire_junctions
-            start_nodes, end_nodes = np.asarray(
-                self.get_index_from_edge(self.wire_junctions)
-            ).T
-            if not callable(window_func):
-                raise ValueError("To use a built-in model, a window function must be provided.")
-            args = (
-                self, source_node, drain_node, voltage_func, edge_list, 
-                start_nodes, end_nodes, window_func, solver, spsolve_kwargs
-            )
-
         # Solve how the state variables change over time
         sol = solve_ivp(
-            deriv, t_span, y0, "DOP853", t_eval, args=args, **ivp_options
+            model, t_span, y0, "DOP853", t_eval, args=args, **ivp_options
         )
 
         # Update the state variables

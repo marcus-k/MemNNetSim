@@ -20,12 +20,7 @@ from .typing import *
 
 from .nanowires import get_edge_indices
 from .calculations import solve_drain_current, solve_network
-from .models import (
-    resist_func,
-    _HP_model_no_decay,
-    _HP_model_decay,
-    _SLT_model,
-)
+from . import models
 
 
 def solve_evolution(
@@ -115,13 +110,13 @@ def solve_evolution(
 
     # Define initial state and associated derivative
     if model == "default" or model == "HP":
-        _deriv = _HP_model_no_decay
+        _deriv = models.HP_model
         y0 = w0
     elif model == "decay":
-        _deriv = _HP_model_decay
+        _deriv = models.decay_HP_model
         y0 = w0
     elif model == "chen" or model == "SLT":
-        _deriv = _SLT_model
+        _deriv = models.SLT_HP_model
         y0 = np.hstack((w0, tau0, epsilon0))
         if "sigma" not in NWN.graph.keys():
             raise AttributeError(
@@ -133,8 +128,7 @@ def solve_evolution(
         _deriv, t_span, y0, "DOP853", t_eval, 
         atol = tol, 
         rtol = tol,
-        args = (NWN, source_node, drain_node, voltage_func, edge_list, 
-            start_nodes, end_nodes, window_func, solver, kwargs)
+        args = (NWN, source_node, drain_node, voltage_func, window_func, solver, kwargs)
     )
 
     # Update NWN to final state variables.
@@ -195,7 +189,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
     if len(args) == 1:
         if isinstance(args[0], Number):
             w = args[0]
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {
@@ -211,7 +205,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
         # vector w and edge_list passed
         if isinstance(args[0], np.ndarray) and isinstance(args[1], Iterable):
             w, edge_list = args
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {
@@ -223,7 +217,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
         # scalar w and scalar tau passed
         elif isinstance(args[0], Number) and isinstance(args[1], Number):
             w, tau = args
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {
@@ -242,7 +236,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
             isinstance(args[1], np.ndarray) and 
             isinstance(args[2], Iterable)):
             w, tau, edge_list = args
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {
@@ -256,7 +250,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
             isinstance(args[1], Number) and 
             isinstance(args[2], Number)):
             w, tau, epsilon = args
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {
@@ -278,7 +272,7 @@ def set_state_variables(NWN: NanowireNetwork, *args):
             isinstance(args[2], np.ndarray) and
             isinstance(args[3], Iterable)):
             w, tau, epsilon, edge_list = args
-            R = resist_func(NWN, w)
+            R = models.resist_func(NWN, w)
 
             attrs = {
                 edge: {

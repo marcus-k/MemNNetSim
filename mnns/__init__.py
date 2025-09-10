@@ -40,7 +40,6 @@ from .plotting import (
 )
 
 from .dynamics import (
-    resist_func,
     solve_evolution,
     set_state_variables,
     get_evolution_current,
@@ -52,7 +51,4 @@ from .units import (
     get_units
 )
 
-from .models import (
-    set_SLT_params,
-    set_chen_params,
-)
+from . import models
