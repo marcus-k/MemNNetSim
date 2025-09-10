@@ -66,7 +66,7 @@ def HP_model(
     kwargs: Optional[dict] = None
 ) -> npt.NDArray:
     """
-    HP Model [1]_. Provides the time derivative of the state variable `x` (the
+    HP Model [1]. Provides the time derivative of the state variable `x` (the
     dimensionless version of `w`). Assumes voltage sources are used.
 
     Parameters
@@ -107,8 +107,8 @@ def HP_model(
 
     References
     ----------
-    .. [1] D. B. Strukov, G. S. Snider, D. R. Stewart and R. S. Williams, 
-           *Nature*, 2008, **453**, 80-83
+    [1] D. B. Strukov, G. S. Snider, D. R. Stewart and R. S. Williams, 
+        *Nature*, 2008, **453**, 80-83
 
     """
     if kwargs is None:
