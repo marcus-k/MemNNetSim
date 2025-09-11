@@ -72,19 +72,22 @@ NWN = mnns.create_NWN(units=units)
 
 ## Static Solution
 
-To solve for the voltages of each of the nanowires in a NWN and the current
-through each of the voltage sources. 
+The [`solve_network()`](reference/mnns/calculations.md#mnns.calculations.solve_network)
+function is used to obtain the NWN nanowire voltages given the location of the
+source and drain nanowires and a voltage for the sources. Often, it is 
+desirable to use electrodes for these nodes.
 ```python
 out = mnns.solve_network(NWN, left, right, voltage)
 ```
 If the NWN has `N` nanowires and `M` voltage sources, then the output will have
-the first `N` elements correspond to the nanowire voltage and the last `M`
-elements correspond to the voltage source currents.
+the first `N` elements correspond to the nanowire voltages and the last `M`
+elements correspond to the current draw of the voltage sources.
 
 !!! note "Modified Nodal Analysis"
     The implemented algorithm of solving the nanowire voltages follows the
-    [*modified nodal analysis*](https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html) 
-    scheme. 
+    *modified nodal analysis* scheme. More information about the algorithm
+    can be found on the [Swarthmore College website](https://lpsa.swarthmore.edu/Systems/Electrical/mna/MNA3.html).
+    
 
 ## Dynamic Solution
 
@@ -92,3 +95,48 @@ To solve the NWN nanowire voltages over time, [`NWN.evolve()`](reference/mnns/na
 is performed to the network. Various parameters must be set first before
 evolving the network.
 
+Define the voltage and window functions.
+```python
+def voltage_func(t):
+    """DC Voltage"""
+    V0 = 20
+    return V0 * np.ones_like(t)
+
+def window_func(x):
+    """Quadratic Window Function"""
+    x = np.clip(x, 0, 1)
+    return x * (1 - x)
+```
+
+Define the memristive model with the desired resistance function and the 
+associated state variables.
+```python
+model = mnns.models.decay_model
+NWN.resistance_function = "linear"
+NWN.state_vars = ["x"]
+NWN.set_state_var("x", 0.05)
+NWN.graph["tau"] = 1.0
+```
+
+Define the time steps.
+```python
+min_time = 0
+max_time = 10000
+dt = 1.0
+t_eval = np.arange(min_time, max_time, dt)
+```
+
+Evolve the NWN and return the state variables as a function of time. The `args`
+parameters is passed to the memristive model function. Evolving the network
+over time is perform using SciPy's [`solve_ivp`](https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html) 
+function. `ivp_options` is passed directly to there.
+```python
+tol = 1e-7
+args = (NWN, bottom_l, top_r, voltage_func, window_func)
+sol = NWN.evolve(
+    model, t_eval, args=args, ivp_options={"rtol": tol, "atol": tol}
+)
+```
+
+Using the state variable solution, one could find the current through each
+of the voltages sources 
