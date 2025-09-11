@@ -3,14 +3,15 @@ from pathlib import Path
 
 import mnns
 import mnns.fromtext
-from mnns.nanowire_network import NanowireNetwork
 import numpy as np
 import networkx as nx
 from collections import Counter
 
+from mnns.nanowire_network import NanowireNetwork
+
 
 @pytest.fixture
-def NWN_benchmark_JDA():
+def NWN_benchmark_JDA() -> NanowireNetwork:
     # Get benchmark file
     current_path = Path(__file__).parent.resolve()
     benchmark = current_path.joinpath("test_networks/benchmark.txt")
@@ -22,14 +23,14 @@ def NWN_benchmark_JDA():
 
 
 @pytest.fixture
-def NWN_benchmark_MNR(NWN_benchmark_JDA):
+def NWN_benchmark_MNR(NWN_benchmark_JDA: NanowireNetwork) -> NanowireNetwork:
     NWN = NWN_benchmark_JDA
     NWN.to_MNR()
     return NWN
 
 
 @pytest.fixture
-def NWN_test1():
+def NWN_test1() -> NanowireNetwork:
     NWN = mnns.create_NWN(size=(8, 5), seed=123)
     mnns.add_electrodes(
         NWN, ["left", 2, 1, [-0.5, 0.5]], ["right", 2, 1, [-0.5, 0.5]]
@@ -37,7 +38,7 @@ def NWN_test1():
     return NWN
 
 
-def test_shortest_path():
+def test_shortest_path() -> None:
     NWN = mnns.create_NWN(seed=123)
     assert NWN.graph["type"] == "JDA"
 
@@ -49,7 +50,7 @@ def test_shortest_path():
     assert path == ans
 
 
-def test_benchmark_network_JDA(NWN_benchmark_JDA):
+def test_benchmark_network_JDA(NWN_benchmark_JDA: NanowireNetwork) -> None:
     # Get benchmark network
     NWN = NWN_benchmark_JDA
     assert NWN.graph["type"] == "JDA"
@@ -65,7 +66,7 @@ def test_benchmark_network_JDA(NWN_benchmark_JDA):
     assert abs(R - R_JDA) < 1e-8
 
 
-def test_benchmark_network_MNR(NWN_benchmark_MNR):
+def test_benchmark_network_MNR(NWN_benchmark_MNR: NanowireNetwork) -> None:
     # Get benchmark network
     NWN = NWN_benchmark_MNR
     assert NWN.graph["type"] == "MNR"
@@ -90,7 +91,7 @@ def test_benchmark_network_MNR(NWN_benchmark_MNR):
 
 
 @pytest.mark.parametrize("NWN", ["NWN_benchmark_JDA", "NWN_test1"])
-def test_MNR_node_count(NWN, request):
+def test_MNR_node_count(NWN: str, request: pytest.FixtureRequest) -> None:
     NWN: NanowireNetwork = request.getfixturevalue(NWN)
     assert NWN.graph["type"] == "JDA"
     NWN.to_MNR()
@@ -114,3 +115,37 @@ def test_MNR_node_count(NWN, request):
         + n_isolated_wires
     
     assert node_count == NWN.number_of_nodes()
+
+
+@pytest.mark.parametrize("NWN", ["NWN_benchmark_JDA", "NWN_test1"])
+def test_state_vars(NWN: str, request: pytest.FixtureRequest) -> None:
+    """Test assigning state variables."""
+    NWN: NanowireNetwork = request.getfixturevalue(NWN)
+    assert NWN.graph["type"] == "JDA"
+
+    # Parameters
+    value = 0.05
+    var = "x"
+
+    # Set state vars
+    NWN.state_vars = [var]
+    NWN.set_state_var(var, value)
+
+    # Obtain values manually
+    data = np.array(list(nx.get_edge_attributes(NWN, var).values()))
+
+    # Check expected
+    assert len(data) == NWN.n_wire_junctions
+    assert np.all(data == value)
+
+    # Check get state var
+    data = NWN.get_state_var(var)
+
+    # Check expected
+    assert len(data) == NWN.n_wire_junctions
+    assert np.all(data == value)
+
+
+
+
+    
