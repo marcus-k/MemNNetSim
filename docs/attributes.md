@@ -29,11 +29,11 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 
 ## NWN Nodes
 
-The nanowire network nodes are tuples of integers. In the junction-dominated 
-assumption (JDA) NWN graph representation, these are one-tuples. In the 
-multi-nodal representation (MNR) NWN graph representation, they can either 
-be two-tuples in the general case, or one-tuples in the case of electrodes 
-or wires with only one junction.
+The NWN [nodes](https://networkx.org/documentation/stable/reference/classes/generated/networkx.Graph.nodes.html) 
+are tuples of integers. In the junction-dominated assumption (JDA) NWN graph 
+representation, these are one-tuples. In the multi-nodal representation (MNR) 
+NWN graph representation, they can either be two-tuples in the general case, 
+or one-tuples in the case of electrodes or wires with only one junction.
 
 | Attribute   | Description                                             |
 |-------------|---------------------------------------------------------|
@@ -42,7 +42,15 @@ or wires with only one junction.
 
 ## NWN Edges
 
-| Attribute     | Description                                   |
-|---------------|-----------------------------------------------|
-| `conductance` | Maximum conductance of the nanowire junction. |
-| `type`        | x-length of the nanowire network.             |
+The NWN [edges](https://networkx.org/documentation/stable/reference/classes/generated/networkx.Graph.edges.html) 
+represent the junctions between nanowires for JDA NWNs, or additionally 
+inner-wire connections between nodes for MNR NWNs. They are just a two-tuple 
+of NWN Nodes.
+
+| Attribute     | Description                                    |
+|---------------|------------------------------------------------|
+| `conductance` | Maximum conductance of the nanowire junction.  |
+| `type`        | Either "junction" (JDA, MNR) or "inner" (MNR). |
+
+Using [`NWN.set_state_var("name")`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.set_state_var),
+an edge attribute `name` will be added to store that state variable value.
