@@ -93,7 +93,7 @@ elements correspond to the current draw of the voltage sources.
 
 To solve the NWN nanowire voltages over time, [`NWN.evolve()`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.evolve) 
 is performed to the network. Various parameters must be set first before
-evolving the network.
+evolving the network. An example configuration is demonstrated below.
 
 Define the voltage and window functions.
 ```python
@@ -118,6 +118,11 @@ NWN.set_state_var("x", 0.05)
 NWN.graph["tau"] = 1.0
 ```
 
+!!! info "State Variable Order"
+    For models which use multiple state variables (such as [`mnns.models.SLT_HP_model`](reference/mnns/models.md#mnns.models.SLT_HP_model)),
+    the order of `NWN.state_vars` matters! The pre-implemented linear resistance
+    function is evaluated using the first state variable in the list.
+
 Define the time steps.
 ```python
 min_time = 0
@@ -132,11 +137,16 @@ over time is perform using SciPy's [`solve_ivp`](https://docs.scipy.org/doc/scip
 function. `ivp_options` is passed directly to there.
 ```python
 tol = 1e-7
-args = (NWN, bottom_l, top_r, voltage_func, window_func)
+args = (NWN, left, right, voltage_func, window_func)
 sol = NWN.evolve(
     model, t_eval, args=args, ivp_options={"rtol": tol, "atol": tol}
 )
 ```
 
-Using the state variable solution, one could find the current through each
-of the voltages sources 
+Using the state variable solution, the current through each of the grounded
+nodes could be found by updating the state variables iteratively with the
+dynamic solution and solving the [static case](#static-solution). This
+is implemented in [`mnns.get_evolution_current()`](reference/mnns/dynamics.md#mnns.dynamics.get_evolution_current).
+```python
+I = mnns.get_evolution_current(NWN, sol, left, right, voltage_func)
+```
