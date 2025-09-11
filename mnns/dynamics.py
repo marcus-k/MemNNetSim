@@ -11,7 +11,7 @@ import networkx as nx
 from scipy.integrate import solve_ivp
 
 from numbers import Number
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Optional
 from scipy.integrate._ivp.ivp import OdeResult
 import numpy.typing as npt
 
@@ -292,41 +292,45 @@ def set_state_variables(NWN: NanowireNetwork, *args):
 def get_evolution_current(
     NWN: NanowireNetwork, 
     sol: OdeResult, 
-    edge_list: list[NWNEdge], 
     source_node: NWNNode | list[NWNNode], 
     drain_node: NWNNode | list[NWNNode], 
     voltage_func: Callable,
+    state_vars: Optional[list[str]] = None,
     scaled: bool = False,
     solver: str = "spsolve",
     **kwargs
 ) -> npt.NDArray:
     """
-    To be used in conjunction with `solve_evolution`. Takes the output from
-    `solve_evolution` and finds the current passing through each drain node
-    at each time step.
+    Calculates the current draw from each drain node as a function of time,
+    given the output state variables from `NWN.evolve()`.
 
-    The appropriate parameters passed should be the same as `solve_evolution`.
+    The source, drain, and voltage are expected to be the same as in the 
+    evolution of the state variables.
+
+    This assumes the resistance function only depends on the first state variable 
+    set.
 
     Parameters
     ----------
-    NWN : Graph
+    NWN : NanowireNetwork
         Nanowire network.
 
     sol : OdeResult
-        Output from `solve_evolution`.
+        Output state variables from `NWN.evolve()`.
 
-    edge_list : list of tuples
-        Output from `solve_evolution`.
-
-    source_node : tuple, or list of tuples
+    source_node : NWNNode, or list of NWNNodes
         Voltage source nodes.
 
-    drain_node : tuple, or list of tuples
+    drain_node : NWNNode, or list of NWNNodes
         Grounded output nodes.
 
     voltage_func : Callable
-        The applied voltage with the calling signature `func(t)`. The voltage 
-        should have units of `v0`.
+        Function which inputs the time as a scalar and returns the voltage of
+        all the source nodes as a scalar. Should be dimensionless.
+
+    state_vars : list of str, optional
+        List of state variables to use. Should not need to be provided.
+        Defaults to `NWN.state_vars`.
 
     scaled : bool, optional
         Scale the output by the characteristic values. Default: False.
@@ -349,17 +353,29 @@ def get_evolution_current(
         source_node = [source_node]
     if isinstance(drain_node, tuple):
         drain_node = [drain_node]
+
+    if state_vars is None:
+        state_vars = NWN.state_vars
         
     # Preallocate output
     current_array = np.zeros((len(sol.t), len(drain_node)))
 
     # Loop through each time step
-    for i in range(len(sol.t)):
-        # Set state variables and get drain currents
-        input_V = voltage_func(sol.t[i])
-        set_state_variables(NWN, sol.y.T[i], edge_list)
+    for i, state in enumerate(sol.y.T):
+        
+        # Set state variables
+        split = np.split(state, len(state_vars))
+        for j, var in enumerate(state_vars):
+            NWN.set_state_var(var, split[j])
+
+        # Update resistance
+        NWN.update_resistance(split[0])
+
+        # Find current draw through drain nodes
+        V = voltage_func(sol.t[i])
         current_array[i] = solve_drain_current(
-            NWN, source_node, drain_node, input_V, scaled, solver, **kwargs)
+            NWN, source_node, drain_node, V, scaled, solver, **kwargs
+        )
     
     return current_array.squeeze()
 

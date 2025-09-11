@@ -316,7 +316,7 @@ def solve_drain_current(
     for i, drain in enumerate(drain_node):
         I = 0
         for node in NWN.neighbors(drain):
-            V = out[NWN.graph["node_indices"][node]]
+            V = out[NWN.get_index(node)]
             R = 1 / NWN.edges[(node, drain)]["conductance"]
             I += V / R
         current_array[i] = I
