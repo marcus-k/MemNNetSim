@@ -1,12 +1,17 @@
 # Nanowire Network Attributes
 
-Nanowire network (NWN) objects are represented internally as standard [NetworkX](https://networkx.org/documentation/stable/tutorial.html)
-graphs. All the attributes are listed below. 
+Nanowire network (NWN) objects are a child class of [NetworkX](https://networkx.org/documentation/stable/tutorial.html)
+graphs. All the graph, node, and edge attributes are listed below. 
 
 ## NWN Graph
 
 Attributes accessed via `NWN.graph["attribute"]`. Most of these are set from
 the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanowire_network.create_NWN).
+
+!!! info "NWN Attributes"
+    Most of the graph attributes are exposed directly as [NanowireNetwork](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork)
+    attributes. The NWN graph attributes are mainly for internal use.
+
 
 | Attribute              | Description                                                                                                                    |
 |------------------------|--------------------------------------------------------------------------------------------------------------------------------|
@@ -14,8 +19,8 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 | `length`               | x-length of the nanowire network. (l₀)                                                                                         |
 | `width`                | y-length of the nanowire network. (l₀)                                                                                         |
 | `size`                 | Size of the network (`length * width`). (l₀²)                                                                                  |
-| `wire_density`         | Wire density of the network. (l₀)                                                                                              |
-| `wire_num`             | Number of wires in the network.                                                                                                |
+| `wire_density`         | Wire density of the network not including electrodes. (l₀)                                                                     |
+| `wire_num`             | Number of wires in the network including electrodes.                                                                           |
 | `junction_conductance` | Conductance of the junctions. (Rₒₙ⁻¹)                                                                                          |
 | `wire_diameter`        | Diameter of each nanowire. (D₀)                                                                                                |
 | `wire_resistivity`     | Resistivity of each nanowire. (ρ₀)                                                                                             |
@@ -23,7 +28,7 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 | `lines`                | List of the Shapely LineStrings uses to represent the nanowires.                                                               |
 | `type`                 | Type of nanowire network representation (`"JDA"` or `"MNR"`).                                                                  |
 | `units`                | Dictionary of characteristic units for the NWN. See [Units](usage.md#units).                                                   |
-| `loc`                  | (JDA only) Dictionary with a two-tuple of node indices as keys and Shapely Points as values. Maps junctions to their location. |
+| `loc`                  | (JDA only) Dictionary with a two-tuple of ints as keys and Shapely Points as values. Maps junctions to their location.         |
 | `junction_density`     | Junction density of the network. (l₀⁻²)                                                                                        |
 | `node_indices`         | Dictionary with nodes as keys and indices as values. Maps nodes to a unique index.                                             |
 
