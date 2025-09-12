@@ -413,7 +413,7 @@ class NanowireNetwork(nx.Graph):
 
         return sol
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         d = {
             "Type": self.type,
             "Wires": self.n_wires,
