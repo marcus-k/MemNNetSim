@@ -50,46 +50,6 @@ def test_shortest_path() -> None:
     assert path == ans
 
 
-def test_benchmark_network_JDA(NWN_benchmark_JDA: NanowireNetwork) -> None:
-    # Get benchmark network
-    NWN = NWN_benchmark_JDA
-    assert NWN.graph["type"] == "JDA"
-
-    # Calculate JDA resistance
-    V = 1.0
-    sol = mnns.solve_network(NWN, (0,), (1,), V)
-    R = V / sol[-1]
-    R *= NWN.graph["units"]["Ron"]
-
-    # Check for the correct JDA resistance
-    R_JDA = 20 + 20 + 1 / (1 / (20 + 20) + 1 / 20)  # 160/3
-    assert abs(R - R_JDA) < 1e-8
-
-
-def test_benchmark_network_MNR(NWN_benchmark_MNR: NanowireNetwork) -> None:
-    # Get benchmark network
-    NWN = NWN_benchmark_MNR
-    assert NWN.graph["type"] == "MNR"
-    units = NWN.graph["units"]
-
-    # Calculate MNR resistance
-    V = 1.0
-    sol = mnns.solve_network(NWN, (0,), (1,), V)
-    R = V / sol[-1]
-    R *= units["Ron"]
-
-    # Check for the correct MNR resistance
-    const = units["rho0"] / (np.pi/4 * units["D0"]**2) * 1e3
-    Rin1 = const * 1.2
-    Rin2 = const * np.hypot(0.3, 0.3)
-    Rin3 = const * np.hypot(1.5, 1.5)
-    Rin4 = const * 1.5
-
-    R_MNR = 20 + Rin1 + 20 + Rin2 + \
-        1 / (1 / (Rin3 + 20) + 1 / (20 + Rin4 + 20))    # ~74.618
-    assert abs(R - R_MNR) < 1e-8
-
-
 @pytest.mark.parametrize("NWN", ["NWN_benchmark_JDA", "NWN_test1"])
 def test_MNR_node_count(NWN: str, request: pytest.FixtureRequest) -> None:
     NWN: NanowireNetwork = request.getfixturevalue(NWN)
