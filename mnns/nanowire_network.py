@@ -110,8 +110,15 @@ class NanowireNetwork(nx.Graph):
         return self.graph["wire_density"]
 
     @property
-    def loc(self) -> dict[NWNNode, Point]:
-        """Dictionary of wire junction locations."""
+    def loc(self) -> dict[tuple[int, int], Point]:
+        """
+        Dictionary of graph edge locations (nanowire junctions). Only 
+        represents anything meaningful for JDA NWNs. MNR NWNs do not update 
+        this value. Indexes with a NWNEdge but without the nested tuples.
+
+        Does not have a guaranteed ordering.
+        
+        """
         return self.graph["loc"]
 
     def get_index(self, node: NWNNode | list[NWNNode]) -> NWNNodeIndex:
@@ -140,8 +147,8 @@ class NanowireNetwork(nx.Graph):
     def wire_junctions(self) -> list[NWNEdge]:
         """
         Return a list of edges with the "type" attribute set to "junction". 
-        Once called, the list is cached. If wires are added, clear the cache
-        by deleting the property.
+        Once called, the list is cached so the ordering can be fixed. If wires 
+        are added, clear the cache by deleting the property.
 
         """
         if self._wire_junctions is None:
@@ -408,7 +415,7 @@ class NanowireNetwork(nx.Graph):
 
         return sol
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         d = {
             "Type": self.type,
             "Wires": self.n_wires,

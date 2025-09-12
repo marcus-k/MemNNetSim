@@ -11,7 +11,7 @@ from typing import Dict
 import numpy as np
 from shapely.geometry import LineString
 
-from .line_functions import find_intersects
+from .nanowires import add_wires
 from .units import NWNUnits
 from .nanowire_network import NanowireNetwork
 
@@ -70,10 +70,6 @@ def create_NWN_from_txt(
     width = np.max(y) - np.min(y)
     size = length * width
 
-    # Find density
-    wire_num = len(line_list)
-    density = wire_num / size
-
     # Get characteristic units
     units = NWNUnits(units)
 
@@ -83,8 +79,8 @@ def create_NWN_from_txt(
         length = length,
         width = width, 
         size = size,
-        wire_density = density, 
-        wire_num = wire_num,
+        wire_density = 0, 
+        wire_num = 0,
         junction_conductance = conductance,
         junction_capacitance = None,
         wire_diameter = diameter,
@@ -93,33 +89,19 @@ def create_NWN_from_txt(
         lines = [],
         type = "JDA",
         units = units,
+        loc = {},
+        node_indices = {},
     )
 
-    # Add the wires as nodes to the graph
-    for i in range(NWN.graph["wire_num"]):
-        NWN.graph["lines"].append(line_list[i])
-        if i == 0 or i == 1:
-            NWN.add_node((i,), electrode=True)
-            NWN.graph["electrode_list"].append((i,))
-        else:
-            NWN.add_node((i,), electrode=False)
-        
-    # Find intersects and create the edges (junctions)
-    intersect_dict = find_intersects(NWN.graph["lines"])
-    NWN.add_edges_from(
-        [((key[0],), (key[1],)) for key in intersect_dict.keys()], 
-        conductance = conductance,
-        capacitance = None,
-        type = "junction"
-    )
-    NWN.graph["loc"] = intersect_dict
+    # Split lines
+    electrode_lines = line_list[0:2]
+    wire_lines = line_list[2:]
+
+    # Add wires to the graph
+    add_wires(NWN, electrode_lines, [True] * len(electrode_lines))
+    add_wires(NWN, wire_lines, [False] * len(wire_lines))
     
     # Find junction density
-    NWN.graph["junction_density"] = len(intersect_dict) / size
-
-    # Create index lookup
-    NWN.graph["node_indices"] = {
-        node: ind for ind, node in enumerate(sorted(NWN.nodes()))
-    }
+    NWN.graph["junction_density"] = len(NWN.graph["loc"].keys()) / size
 
     return NWN

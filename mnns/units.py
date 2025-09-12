@@ -102,6 +102,9 @@ class NWNUnits:
             [f"{k:>{m1}}: {v:<{m2}} {self.desc[k]}" for k, v in self.units.items()]
         )
         return s
+    
+    def __eq__(self, other) -> bool:
+        return self.units == other
         
 
 def get_units(new_units: dict[str, float] = None) -> dict[str, float]:

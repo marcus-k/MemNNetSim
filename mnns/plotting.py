@@ -101,7 +101,6 @@ def plot_NWN(
     if ylabel: 
         ax.set_ylabel(ylabel)
 
-    plt.show()
     return fig, ax
 
 
@@ -217,6 +216,5 @@ def draw_NWN(
     else:
         raise ValueError("Nanowire network has invalid type.")
 
-    plt.show()
     return fig, ax
 
