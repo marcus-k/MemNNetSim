@@ -38,6 +38,7 @@ docs = [
     "mkdocstrings[python]",
     "mkdocs-material",
     "mkdocs-api-autonav",
+    "mkdocs-macros-plugin",
     "black",
 ]
 

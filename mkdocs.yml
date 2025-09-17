@@ -7,17 +7,20 @@ theme:
   name: material
   palette:
     - scheme: default
+      primary: blue
       toggle:
         icon: material/brightness-7 
         name: Switch to dark mode
     - scheme: slate
+      primary: blue
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
     - search.suggest
-    - autorefs
     - content.code.copy
+    - navigation.sections
+    - navigation.indexes
     
 plugins:
   - search
@@ -39,17 +42,26 @@ plugins:
   - api-autonav:
       modules: ["mnns"]
       nav_section_title: Reference
+  - macros
 
 markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences
   - toc:
       permalink: true
-  - admonition
-  - pymdownx.details
-  - pymdownx.superfences
 
 nav:
   - Home: index.md
   - Installation: installation.md
   - Usage: usage.md
-  - NWN Attributes: attributes.md
-  - Reference
+  - Examples: examples.md
+  - Reference:
+    - NWN Attributes: attributes.md
+
+not_in_nav: | 
+  examples/

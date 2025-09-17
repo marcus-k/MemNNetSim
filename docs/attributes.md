@@ -3,14 +3,15 @@
 Nanowire network (NWN) objects are a child class of [NetworkX](https://networkx.org/documentation/stable/tutorial.html)
 graphs. All the graph, node, and edge attributes are listed below. 
 
-## NWN Graph
+## NWN Graph Attributes
 
 Attributes accessed via `NWN.graph["attribute"]`. Most of these are set from
 the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanowire_network.create_NWN).
 
-!!! info "NWN Attributes"
+!!! info "NanowireNetwork Attributes"
     Most of the graph attributes are exposed directly as [NanowireNetwork](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork)
-    attributes. The NWN graph attributes are mainly for internal use.
+    attributes or through getters/setters. The NWN graph attributes are mainly 
+    for internal use.
 
 
 | Attribute              | Description                                                                                                                    |
@@ -32,7 +33,7 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 | `junction_density`     | Junction density of the network. (l₀⁻²)                                                                                        |
 | `node_indices`         | Dictionary with nodes as keys and indices as values. Maps nodes to a unique index.                                             |
 
-## NWN Nodes
+## NWN Nodes Attributes
 
 The NWN [nodes](https://networkx.org/documentation/stable/reference/classes/generated/networkx.Graph.nodes.html) 
 are tuples of integers. In the junction-dominated assumption (JDA) NWN graph 
@@ -45,7 +46,7 @@ or one-tuples in the case of electrodes or wires with only one junction.
 | `electrode` | Whether or not this node is an electrode.               |
 | `loc`       | (MNR only) Location of the junction as a Shapely Point. |
 
-## NWN Edges
+## NWN Edges Attributes
 
 The NWN [edges](https://networkx.org/documentation/stable/reference/classes/generated/networkx.Graph.edges.html) 
 represent the junctions between nanowires for JDA NWNs, or additionally 
