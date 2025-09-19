@@ -1,0 +1,70 @@
+site_name: MemNNetSim
+
+repo_url: https://github.com/marcus-k/MemNNetSim
+repo_name: marcus-k/MemNNetSim
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - search.suggest
+    - content.code.copy
+    - navigation.sections
+    - navigation.indexes
+    
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_section_style: table # or "table"
+            docstring_style: "numpy"
+            filters: ["!^_"]
+            heading_level: 1
+            merge_init_into_class: true
+            separate_signature: true
+            show_root_heading: true
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            summary: true
+  - api-autonav:
+      modules: ["mnns"]
+      nav_section_title: Reference
+      exclude:
+        - mnns.typing
+        - mnns.version
+  - macros
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Usage: usage.md
+  - Examples: examples.md
+  - Reference:
+    - NWN Attributes: attributes.md
+
+not_in_nav: | 
+  examples/

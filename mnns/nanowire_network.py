@@ -363,8 +363,10 @@ class NanowireNetwork(nx.Graph):
             Model to use for the evolution. Should be a function with the
             signature `func(t, y, *args)` where `t` is the time, `y` is the
             state variable(s), and `args` are any additional arguments.
-            Pre-implemented models include: `mnns.models.HP_model`,
-            `mnns.models.decay_HP_model`, and `mnns.models.SLT_HP_model`.
+            Pre-implemented models include: 
+            [`mnns.models.HP_model`](models.md#mnns.models.HP_model),
+            [`mnns.models.decay_HP_model`](models.md#mnns.models.decay_HP_model), 
+            and [`mnns.models.SLT_HP_model`](models.md#mnns.models.SLT_HP_model).
 
         t_eval : ndarray
             Time points to evaluate the solution at.
