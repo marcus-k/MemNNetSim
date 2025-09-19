@@ -58,5 +58,6 @@ of NWN Nodes.
 | `conductance` | Maximum conductance of the nanowire junction.  |
 | `type`        | Either "junction" (JDA, MNR) or "inner" (MNR). |
 
-Using [`NWN.set_state_var("name")`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.set_state_var),
-an edge attribute `name` will be added to store that state variable value.
+Using [`NWN.set_state_var("name", val)`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.set_state_var),
+an edge attribute `name` will be added to store the state variable value `val`
+for all edges.

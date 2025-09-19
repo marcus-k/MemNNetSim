@@ -42,6 +42,9 @@ plugins:
   - api-autonav:
       modules: ["mnns"]
       nav_section_title: Reference
+      exclude:
+        - mnns.typing
+        - mnns.version
   - macros
 
 markdown_extensions:

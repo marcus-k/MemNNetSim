@@ -1,3 +1,7 @@
+---
+hide:   
+  - toc
+---
 # Hysteresis
 
 This example showcases a hysteresis plot using the [HP model](../reference/mnns/models.md#mnns.models.HP_model) as the memristive model the governs the nanowire junction evolution.

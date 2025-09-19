@@ -93,7 +93,7 @@ elements correspond to the current draw of the voltage sources.
 
 To solve the NWN nanowire voltages over time, [`NWN.evolve()`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.evolve) 
 is performed to the network. Various parameters must be set first before
-evolving the network. An example configuration is demonstrated below.
+evolving the network. A walkthrough of an example parameters follows.
 
 Define the voltage and window functions.
 ```python
@@ -103,7 +103,7 @@ def voltage_func(t):
     return V0 * np.ones_like(t)
 
 def window_func(x):
-    """Quadratic Window Function"""
+    """Strukov window function"""
     x = np.clip(x, 0, 1)
     return x * (1 - x)
 ```
@@ -111,12 +111,17 @@ def window_func(x):
 Define the memristive model with the desired resistance function and the 
 associated state variables.
 ```python
-model = mnns.models.decay_model
+model = mnns.models.HP_model
 NWN.resistance_function = "linear"
 NWN.state_vars = ["x"]
-NWN.set_state_var("x", 0.05)
-NWN.graph["tau"] = 1.0
+NWN.set_state_var("x", 0.1)
 ```
+!!! info "Model Parameters"
+    For models with extra parameters, for example in the [Decay HP model](reference/mnns/models.md#mnns.models.decay_HP_model),
+    they can be set with graph attributes.
+    ```python
+    NWN.graph["tau"] = 100
+    ```
 
 !!! info "State Variable Order"
     For models which use multiple state variables (such as [`mnns.models.SLT_HP_model`](reference/mnns/models.md#mnns.models.SLT_HP_model)),
