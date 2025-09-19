@@ -1,6 +1,6 @@
 # Memristive Nanowire Network Simulator (MemNNetSim)
 
-Python package for modelling and analyzing random memristive nanowire networks.
+MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python package for modelling and analyzing memristive random nanowire networks (NWNs).
 
 # Table of Contents
 * [Installation](#installation)
@@ -10,30 +10,34 @@ Python package for modelling and analyzing random memristive nanowire networks.
 
 # Installation
 
-The latest version of MemNNetSim can be installed from PyPI:
+MemNNetSim has been tested on Python 3.10 to 3.13. It is recommended to install MemNNetSim in a virtual environment such as with venv or conda/mamba.
 
-`pip install mnns`
+For installing locally, a pip version of 21.1 or greater is required.
 
-An Anaconda environment file is also provided to create a new virtual 
-environment with the minimum required dependencies required to run the package.
+## Installation from PyPI
 
-`conda env create -n mnns -f environment.yml`
+Install the latest release of MemNNetSim using pip:
+```bash
+pip install mnns
+```
 
-Be sure you activate the environment before using the package!
+## Installation for development
 
-`conda activate mnns`
+Download or clone the GitHub repository:
+```bash
+git clone https://github.com/marcus-k/MemNNetSim.git
+cd ./MemNNetSim
+```
 
-# Development
+Then install the package in editable mode using pip:
+```bash
+pip install -e .[dev]
+```
 
-One can use the `dev-environment.yml` file with Anaconda to create a new 
-virtual environment with all the required dependencies for development.
-
-`conda env create -n mnns -f dev-environment.yml`
-
-This will also install the mnns package in editable mode (i.e. as if 
-running `pip install -e .` in the base folder).
-
-A pip version of [21.1](https://pip.pypa.io/en/latest/news/#v21-1) or greater is required.
+To install for editing the documentation, add the `[docs]` optional dependencies:
+```bash
+pip install -e .[docs]
+```
 
 # Usage
 
@@ -60,4 +64,4 @@ Inner-wire junctions: None
 
 To uninstall the package, use:
 
-`pip uninstall randomnwn`
+`pip uninstall mnns`
