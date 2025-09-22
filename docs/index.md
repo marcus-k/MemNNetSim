@@ -1,4 +1,11 @@
-# MemNNetSim
+<style>
+  .md-typeset h1,
+  .md-content__button {
+    display: none;
+  }
+</style>
+![mnns-banner](assets/icons/mnns-banner-dark.svg#only-light)
+![mnns-banner](assets/icons/mnns-banner-light.svg#only-dark)
 
 MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python 
 package for modelling and analyzing memristive random **n**ano**w**ire 
