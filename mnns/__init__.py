@@ -2,7 +2,10 @@
 MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python 
 package for modelling and analyzing memristive random nanowire networks (NWNs).
 
-Import using `import mnns`.
+Import MemNNetSim using:
+```python
+import mnns
+```
 
 """
 from .version import __version__

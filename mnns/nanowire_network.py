@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Functions to create nanowire networks.
-# 
 # Author: Marcus Kasdorf
 # Date:   July 8, 2024
+"""
+Functions to create nanowire networks.
+"""
 
 from __future__ import annotations
 

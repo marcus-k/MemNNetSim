@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Functions to create nanowire networks from text file.
-# Testing only, not for production.
-# 
 # Author: Marcus Kasdorf
 # Date:   July 15, 2021
+"""
+Not for production. Functions to create nanowire networks from text file.
+"""
 
 from typing import Dict
 import numpy as np

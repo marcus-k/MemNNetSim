@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Functions for random lines.
-# 
 # Author: Marcus Kasdorf
 # Date:   May 20, 2021
+"""
+Functions for random lines.
+"""
 
 import numpy as np
 from numpy.random import uniform

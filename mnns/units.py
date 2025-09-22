@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# Characteristic units for a nanowire network.
-# 
 # Author: Marcus Kasdorf
 # Date:   July 1, 2021
-
+"""
+Characteristic units for a nanowire network.
+"""
 
 class NWNUnits:
     """

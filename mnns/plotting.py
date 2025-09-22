@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Functions to plot nanowire networks.
 # 
 # Author: Marcus Kasdorf
 # Date:   July 8, 2021
+"""
+Functions to plot nanowire networks.
+"""
 
 import numpy as np
 import networkx as nx

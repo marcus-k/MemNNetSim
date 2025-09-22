@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Functions to modify nanowire networks.
 # 
 # Author: Marcus Kasdorf
 # Date:   July 26, 2021
+"""
+Functions to modify nanowire networks.
+"""
 
 from __future__ import annotations
 

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Functions to solve nanowire networks.
 # 
 # Author: Marcus Kasdorf
 # Date:   July 19, 2021
+"""
+Functions to statically solve nanowire networks.
+"""
 
 from __future__ import annotations
 

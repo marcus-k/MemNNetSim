@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Various dynamic models for nanowire networks.
-#
-# References
-# ----------
-# [1] HP Model https://doi.org/10.1038/nature06932
-# [2] Decay HP Model https://doi.org/10.1088/0957-4484/24/38/384004
-# [3] SLT Model https://doi.org/10.1016/j.physleta.2014.08.018
 # 
 # Author: Marcus Kasdorf
 # Date:   July 28, 2021
+"""
+Various dynamic models for nanowire networks.
+"""
 
 from __future__ import annotations
 

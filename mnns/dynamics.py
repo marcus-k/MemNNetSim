@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Functions to evolve nanowire networks over time.
 # 
 # Author: Marcus Kasdorf
 # Date:   July 28, 2021
+"""
+Functions to evolve nanowire networks over time.
+"""
 
 import numpy as np
 import networkx as nx
