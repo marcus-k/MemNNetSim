@@ -31,7 +31,7 @@ def NWN_benchmark_MNR(NWN_benchmark_JDA: NanowireNetwork) -> NanowireNetwork:
 
 @pytest.fixture
 def NWN_test1() -> NanowireNetwork:
-    NWN = mnns.create_NWN(size=(8, 5), seed=123)
+    NWN = mnns.create_NWN(shape=(8, 5), seed=123)
     mnns.add_electrodes(
         NWN, ["left", 2, 1, [-0.5, 0.5]], ["right", 2, 1, [-0.5, 0.5]]
     )

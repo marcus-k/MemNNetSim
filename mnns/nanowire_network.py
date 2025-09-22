@@ -437,7 +437,7 @@ class NanowireNetwork(nx.Graph):
 
 def create_NWN(
     wire_length: float = (7.0 / 7),
-    size: tuple | float = (50.0 / 7),
+    shape: tuple[float, float] = ((50.0 / 7), (50.0 / 7)),
     density: float = (0.3 * 7**2),
     seed: int = None,
     conductance: float = (0.1 / 0.1),
@@ -454,22 +454,25 @@ def create_NWN(
     The nanowire network starts in the junction-dominated assumption (JDA), but
     can be converted to the multi-nodal representation (MNR) after creation. 
 
-    The density may not be attainable with the given size, as there can only 
-    be a integer number of wires. Thus, the closest density to an integer 
-    number of wires is used.
+    The desired density may not be attainable with the given shape, as there 
+    can only be a integer number of wires. Thus, the closest density to an 
+    integer number of wires is used and stored as an attribute (see
+    [NWN Attributes](../../attributes.md) for more information).
 
-    See `units.py` for the units used by the parameters. 
+    See [`mnns.NWNUnits`](units.md#mnns.units.NWNUnits) for the units used by 
+    the parameters. 
 
     Parameters
     ----------
     wire_length : float, optional
         Length of each nanowire. Given in units of l0.
 
-    size : 2-tuple or float
-        The size of the nanowire network given in units of l0. If a tuple is
-        given, it is assumed to be (x-length, y-length). If a number is passed,
-        both dimensions will have the same length. The x direction is labeled
-        `length`, while the y direction is labeled `width`.
+    shape : 2-tuple of float
+        The shape of the nanowire network given in units of l0. Assumed to
+        have the shape of (x-length, y-length).
+
+        The x direction is labeled `length`, while the y direction is labeled 
+        `width`. 
 
     density : float, optional
         Density of nanowires in the area determined by the width.
@@ -502,19 +505,14 @@ def create_NWN(
         The created random nanowire network.
 
     """
-    # Convert size to length and width, size will be the area
-    if isinstance(size, tuple):
-        length, width = size
-        size = size[0] * size[1]
-    elif isinstance(size, Number):
-        length, width = size, size
-        size = size * size
-    else:
-        raise ValueError("Invalid size type.")
+    # Find total area in (l0)^2 of the nanowire network
+    length = shape[0]
+    width = shape[1]
+    area = shape[0] * shape[1]
 
     # Get closest density with an integer number of wires.
-    wire_num = round(size * density)
-    density = wire_num / size
+    wire_num = round(area * density)
+    density = wire_num / area
 
     # Get characteristic units
     units = NWNUnits(units)
@@ -524,7 +522,7 @@ def create_NWN(
         wire_length = wire_length,
         length = length,
         width = width,
-        size = size,
+        shape = shape,
         wire_density = density,
         wire_num = wire_num,
         junction_conductance = conductance,
@@ -563,7 +561,7 @@ def create_NWN(
     NWN.graph["loc"] = intersect_dict
 
     # Find junction density
-    NWN.graph["junction_density"] = len(intersect_dict) / size
+    NWN.graph["junction_density"] = len(intersect_dict) / area
 
     # Create index lookup
     NWN.graph["node_indices"] = {

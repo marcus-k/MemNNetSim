@@ -179,7 +179,8 @@ def add_wires(
         NWN.graph["node_indices"].update({(start_ind + i,): start_ind + i})
 
     # Update wire density
-    NWN.graph["wire_density"] = (NWN.graph["wire_num"] - len(NWN.graph["electrode_list"])) / NWN.graph["size"]
+    area = NWN.graph["length"] * NWN.graph["width"]
+    NWN.graph["wire_density"] = (NWN.graph["wire_num"] - len(NWN.graph["electrode_list"])) / area
 
     # Clear current junction list
     del NWN.wire_junctions

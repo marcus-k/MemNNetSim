@@ -68,7 +68,8 @@ def create_NWN_from_txt(
     # Find dimensions
     length = np.max(x) - np.min(x)
     width = np.max(y) - np.min(y)
-    size = length * width
+    shape = (length, width)
+    area = length * width
 
     # Get characteristic units
     units = NWNUnits(units)
@@ -78,7 +79,7 @@ def create_NWN_from_txt(
         wire_length = None,
         length = length,
         width = width, 
-        size = size,
+        shape = shape,
         wire_density = 0, 
         wire_num = 0,
         junction_conductance = conductance,
@@ -102,6 +103,6 @@ def create_NWN_from_txt(
     add_wires(NWN, wire_lines, [False] * len(wire_lines))
     
     # Find junction density
-    NWN.graph["junction_density"] = len(NWN.graph["loc"].keys()) / size
+    NWN.graph["junction_density"] = len(NWN.graph["loc"].keys()) / area
 
     return NWN

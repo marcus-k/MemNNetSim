@@ -19,7 +19,7 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 | `wire_length`          | Length of each nanowire. (l₀)                                                                                                  |
 | `length`               | x-length of the nanowire network. (l₀)                                                                                         |
 | `width`                | y-length of the nanowire network. (l₀)                                                                                         |
-| `size`                 | Size of the network (`length * width`). (l₀²)                                                                                  |
+| `shape`                | Shape of the network (`length`, `width`). (l₀, l₀)                                                                                  |
 | `wire_density`         | Wire density of the network not including electrodes. (l₀)                                                                     |
 | `wire_num`             | Number of wires in the network including electrodes.                                                                           |
 | `junction_conductance` | Conductance of the junctions. (Rₒₙ⁻¹)                                                                                          |
