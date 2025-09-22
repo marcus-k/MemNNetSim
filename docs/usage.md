@@ -16,7 +16,7 @@ The [`create_NWN()`](reference/mnns/nanowire_network.md#mnns.nanowire_network.cr
 constructor has various parameters to initialize and customize it.
 ```python
 NWN = mnns.create_NWN(
-    size = (8, 5), 
+    shape = (8, 5), 
     seed = 5,
     conductance = 1.0
 )

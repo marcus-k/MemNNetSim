@@ -4,7 +4,7 @@ import mnns
 
 # Create a NWN
 NWN = mnns.create_NWN(
-    size = (8, 5),
+    shape = (8, 5),
     seed = 5, 
     density = 14.7
 )
