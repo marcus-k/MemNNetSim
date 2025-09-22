@@ -68,3 +68,6 @@ nav:
 
 not_in_nav: | 
   examples/
+
+watch:
+  - mnns

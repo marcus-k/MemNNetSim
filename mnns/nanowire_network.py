@@ -47,7 +47,8 @@ class ParameterNotSetError(Exception):
 class NanowireNetwork(nx.Graph):
     """
     Internal nanowire network object. Should not be instantiated directly.
-    Use `create_NWN()` instead.
+    Use [`mnns.create_NWN`](nanowire_network.md#mnns.nanowire_network.create_NWN) 
+    instead.
 
     Parameters
     ----------

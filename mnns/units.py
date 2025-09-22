@@ -9,7 +9,24 @@
 
 class NWNUnits:
     """
-    Class for characteristic units for a nanowire network.
+    Class for characteristic units for a nanowire network. Acts similar to a
+    dictionary with key-value pairs to access units.
+
+    The default units for the nanowire network are:
+    ```python
+    units = mnns.NWNUnits()
+    print(units)
+          v0: 1.0     V, Voltage
+         Ron: 10.0    Ω, ON Junction resistance
+          l0: 7.0     μm, Wire length
+          D0: 50.0    nm, Wire diameter
+          w0: 10.0    nm, Junction length (2x Wire coating thickness)
+        rho0: 22.6    nΩm, Wire resistivity
+         mu0: 0.01    μm^2 s^-1 V^-1, Ion mobility
+    Roff_Ron: 160     Off-On Resistance ratio
+          i0: 0.1     A, Current
+          t0: 10000.0 μs, Time
+    ```
 
     Parameters
     ----------
@@ -109,6 +126,9 @@ class NWNUnits:
 
 def get_units(new_units: dict[str, float] = None) -> dict[str, float]:
     """
+    Deprecated. Use [`mnns.NWNUnits`](units.md#mnns.units.NWNUnits) 
+    instead.
+
     Returns the characteristic units for a nanowire network.
 
     Parameters
