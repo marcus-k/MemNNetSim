@@ -192,7 +192,7 @@ class NanowireNetwork(nx.Graph):
         of the memristor element(s).
 
         You can also pass the string "linear" to choose a default linear
-        resistance function based on the state variable w in [0, 1].
+        resistance function based on the state variable x in [0, 1].
 
         The resistance should be nondimensionalized, i.e. the resistance should
         be in units of Ron.
