@@ -16,11 +16,13 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  logo: assets/icons/mnns-icon-light.svg
   features:
     - search.suggest
     - content.code.copy
     - navigation.sections
     - navigation.indexes
+    - navigation.instant
     
 plugins:
   - search
