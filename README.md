@@ -4,15 +4,19 @@ MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python pac
 
 # Table of Contents
 * [Installation](#installation)
-* [Development](#development)
+  * [PyPi](#installation-from-pypi)
+  * [Development](#installation-for-development)
+  * [Uninstallation](#uninstallation)
 * [Usage](#usage)
-* [Uninstallation](#uninstallation)
 
 # Installation
 
-MemNNetSim has been tested on Python 3.10 to 3.13. It is recommended to install MemNNetSim in a virtual environment such as with venv or conda/mamba.
+MemNNetSim has been tested on Python 3.10 to 3.13. It is recommended to install
+MemNNetSim in a virtual environment such as with [venv](https://docs.python.org/3/library/venv.html) 
+or [conda](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html)/[mamba](https://github.com/conda-forge/miniforge).
 
-For installing locally, a pip version of 21.1 or greater is required.
+For installing locally, a pip version of [21.1](https://pip.pypa.io/en/latest/news/#v21-1) 
+or greater is required.
 
 ## Installation from PyPI
 
@@ -39,6 +43,13 @@ To install for editing the documentation, add the `[docs]` optional dependencies
 pip install -e .[docs]
 ```
 
+## Uninstallation
+
+Uninstall MemNNetSim using pip:
+```bash
+pip uninstall mnns
+```
+
 # Usage
 
 Nanowire network objects are simply [NetworkX](https://github.com/networkx/networkx) graphs with various attributes stored in the graph, edges, and nodes.
@@ -59,9 +70,3 @@ Inner-wire junctions: None
 (<Figure size 800x600 with 1 Axes>, <AxesSubplot:>)
 ```
 ![Figure_1](https://user-images.githubusercontent.com/81660172/127204015-9f882ef5-dca3-455d-998f-424a5787b141.png)
-
-# Uninstallation
-
-To uninstall the package, use:
-
-`pip uninstall mnns`
