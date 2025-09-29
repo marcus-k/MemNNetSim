@@ -54,6 +54,6 @@ scaled_t = sol.t * NWN.units["t0"] * 1e-6
 fig, ax = plt.subplots(figsize=(6, 4))
 ax.plot(scaled_t, scaled_I * 1e3)
 ax.grid(alpha=0.5)
-ax.set_xlabel("Voltage (V)")
+ax.set_xlabel("Time (s)")
 ax.set_ylabel("Current (mA)")
 plt.show()
