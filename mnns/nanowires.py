@@ -289,6 +289,8 @@ def add_electrodes(NWN: NanowireNetwork, *args)  -> list[JDANode]:
                     end = ((i + 1) / num * length) - (spacing / 2)
                     line_list.append(LineString(
                         [(start + delta, 0), (end + delta, 0)]))
+            else:
+                raise ValueError(f"Invalid side: {side}")
       
     else:
         raise ValueError("Arguments after NWN must be all strings or all lists.")
