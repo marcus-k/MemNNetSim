@@ -28,7 +28,7 @@ the NWN constructor [create_NWN()](reference/mnns/nanowire_network.md#mnns.nanow
 | `electrode_list`       | List of electrode nodes.                                                                                                       |
 | `lines`                | List of the Shapely LineStrings uses to represent the nanowires.                                                               |
 | `type`                 | Type of nanowire network representation (`"JDA"` or `"MNR"`).                                                                  |
-| `units`                | Dictionary of characteristic units for the NWN. See [Units](usage.md#units).                                                   |
+| `units`                | Dictionary of characteristic units for the NWN. See [NWN Units](usage.md#nwn-units).                                                   |
 | `loc`                  | (JDA only) Dictionary with a two-tuple of ints as keys and Shapely Points as values. Maps junctions to their location.         |
 | `junction_density`     | Junction density of the network. (l₀⁻²)                                                                                        |
 | `node_indices`         | Dictionary with nodes as keys and indices as values. Maps nodes to a unique index.                                             |
@@ -55,7 +55,7 @@ of NWN Nodes.
 
 | Attribute     | Description                                    |
 |---------------|------------------------------------------------|
-| `conductance` | Maximum conductance of the nanowire junction.  |
+| `conductance` | Conductance of the nanowire junction.          |
 | `type`        | Either "junction" (JDA, MNR) or "inner" (MNR). |
 
 Using [`NWN.set_state_var("name", val)`](reference/mnns/nanowire_network.md#mnns.nanowire_network.NanowireNetwork.set_state_var),

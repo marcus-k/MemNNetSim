@@ -22,12 +22,25 @@ NWN = mnns.create_NWN(
 )
 ```
 
-Add electrodes (equipotential wires with no memristive junctions) to a NWN.
+The [`add_electrodes()`](reference/mnns/nanowires.md#mnns.nanowires.add_electrodes) 
+function provides different ways to add electrodes to a NWN and return
+their index. These are equipotential nanowires with no memristive junctions.
 ```python
 left, right = mnns.add_electrodes(NWN, "left", "right")
 ```
 
-## Units
+By default, NWNs are created using the junction dominated assumption (JDA).
+This assumes nanowires are equipotential and have no internal resistance. Only 
+after all desired electrodes are added, the NWN can be converted to the 
+multi-nodal representation (MNR) in-place.
+```python
+NWN.to_MNR()
+```
+This adds internal nanowire resistance based on the nanowire diameter and
+resistivity (specified when initializing the NWN) and recreates the 
+underlying graph object to add these additional nodes and edges. 
+
+## NWN Units
 
 MemNNetSim performs all calculations using nondimensionalized units. As such, 
 inputs into various MemNNetSim functions require inputs which have no units.
@@ -69,6 +82,42 @@ These units can then be used when creating a NWN.
 units = mnns.NWNUnits({"v0": 2.0})
 NWN = mnns.create_NWN(units=units)
 ```
+
+## NWN Indices
+
+Since MemNNetSim uses NetworkX graphs as the parent class for NWNs, the nodes
+and edges can still be indexed using `NWN.nodes` and `NWN.edges` respectively;
+however, the index labels are different depending on if the NWN is using JDA
+or MNR.
+
+For JDA NWNs, the indices used are a one-tuple of integers.
+```python
+>>> NWN.nodes[(0,)]
+{'electrode': False}
+```
+JDA nodes represent individual nanowires and edges represent a junction between
+nanowires.
+
+For MNR NWNs, the indices used are a two-tuple of integers.
+```python
+>>> NWN.nodes[(0, 0)]
+{'loc': <POINT (6.443 3.971)>, 'electrode': False}
+```
+MNR nodes represent specific points on a nanowire and edges represent either a
+junction between nanowires or an inner-nanowire connection.
+
+!!! note "Electrode Indices"
+    Regardless of if a NWN is using JDA or MNR, electrodes will always be
+    indexed using a one-tuple since by definition they are equipotential!
+
+Edges can then be indexed as expected.
+```python
+>>> NWN.edges[((0, 0), ((0, 5)))]
+{'conductance': 1.7122000108743876, 'capacitance': 0, 'type': 'inner'}
+```
+The `type` edge attribute stores whether the edges is an inner-nanowire
+connection or a nanowire junction. Currently, the `capacitance` edge attribute 
+is not used for anything.
 
 ## Static Solution
 
