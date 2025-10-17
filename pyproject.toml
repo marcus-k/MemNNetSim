@@ -31,7 +31,8 @@ dev = [
     "pytest",
     "ipykernel",
     "joblib",
-    "line_profiler"
+    "line_profiler",
+    "black",
 ]
 docs = [
     "mkdocs",
@@ -47,3 +48,6 @@ packages = ["mnns"]
 
 [tool.setuptools.dynamic]
 version = {attr = "mnns.version.__version__"}
+
+[tool.black]
+line-length = 80
