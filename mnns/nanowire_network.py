@@ -23,8 +23,8 @@ from numbers import Number
 from .typing import *
 
 from .units import NWNUnits
-from .line_functions import create_line, find_intersects
-from .nanowires import convert_NWN_to_MNR
+from .line_functions import create_line
+from .nanowires import add_wires, convert_NWN_to_MNR
 from . import models
 
 class ParameterNotSetError(Exception):
@@ -445,7 +445,9 @@ def create_NWN(
     capacitance: float = 1000,
     diameter: float = (50.0 / 50.0),
     resistivity: float = (22.6 / 22.6),
-    units: dict[str, float] = None
+    units: dict[str, float] = None,
+    angle_dist: str = "uniform",
+    angle_kwargs: dict | None = None,
 ) -> NanowireNetwork:
     """
     Create a nanowire network represented by a NetworkX graph. Wires are 
@@ -525,7 +527,7 @@ def create_NWN(
         width = width,
         shape = shape,
         wire_density = density,
-        wire_num = wire_num,
+        wire_num = 0,
         junction_conductance = conductance,
         junction_capacitance = capacitance,
         wire_diameter = diameter,
@@ -534,39 +536,26 @@ def create_NWN(
         lines = [],
         type = "JDA",
         units = units,
-        tau = 0.0,
-        epsilon = 0.0,
+        loc = {},
+        node_indices = {},
     )
 
     # Create seeded random generator for testing
     rng = np.random.default_rng(seed)
 
-    # Add the wires as nodes to the graph
-    for i in range(NWN.graph["wire_num"]):
-        NWN.graph["lines"].append(create_line(
-            NWN.graph["wire_length"],
-            xmax = NWN.graph["length"],
-            ymax = NWN.graph["width"],
-            rng = rng
-        ))
-        NWN.add_node((i,), electrode=False)
+    # Create the underlying line that represent the nanowires
+    lines = []
+    for _ in range(wire_num):
+        lines.append(
+            create_line(
+                length=wire_length, xmax=length, ymax=width, rng=rng, angle_dist=angle_dist, angle_kwargs=angle_kwargs
+            )
+        )
 
-    # Find intersects and create the edges (junctions)
-    intersect_dict = find_intersects(NWN.graph["lines"])
-    NWN.add_edges_from(
-        [((key[0],), (key[1],)) for key in intersect_dict.keys()],
-        conductance = conductance,
-        capacitance = capacitance,
-        type = "junction"
-    )
-    NWN.graph["loc"] = intersect_dict
+    # Create nanowire from lines
+    add_wires(NWN, lines, [False] * len(lines))
 
     # Find junction density
-    NWN.graph["junction_density"] = len(intersect_dict) / area
-
-    # Create index lookup
-    NWN.graph["node_indices"] = {
-        node: ind for ind, node in enumerate(sorted(NWN.nodes()))
-    }
+    NWN.graph["junction_density"] = len(NWN.graph["loc"].keys()) / area
 
     return NWN
