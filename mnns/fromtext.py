@@ -15,16 +15,17 @@ from .nanowires import add_wires
 from .units import NWNUnits
 from .nanowire_network import NanowireNetwork
 
+
 def create_NWN_from_txt(
     filename: str,
     conductance: float = 1.0,
     diameter: float = 1.0,
     resistivity: float = 1.0,
-    units: Dict[str, float] = None
+    units: Dict[str, float] = None,
 ) -> NanowireNetwork:
     """
-    Create a nanowire network represented by a NetworkX graph. Wires are 
-    represented by the graph's vertices, while the wire junctions are 
+    Create a nanowire network represented by a NetworkX graph. Wires are
+    represented by the graph's vertices, while the wire junctions are
     represented by the graph's edges.
 
     The text file input is assumed to be in two columns: x and y.
@@ -48,7 +49,7 @@ def create_NWN_from_txt(
         The resistivity of each nanowire. Given in units of rho0.
 
     units : dict, optional
-        Dictionary of custom base units. Defaults to None which will use the 
+        Dictionary of custom base units. Defaults to None which will use the
         default units given in `units.py`
 
     Returns
@@ -63,7 +64,7 @@ def create_NWN_from_txt(
     # Convert to LineStrings
     line_list = []
     for i in range(0, len(x), 2):
-        line_list.append(LineString([(x[i], y[i]), (x[i+1], y[i+1])]))
+        line_list.append(LineString([(x[i], y[i]), (x[i + 1], y[i + 1])]))
 
     # Find dimensions
     length = np.max(x) - np.min(x)
@@ -76,22 +77,22 @@ def create_NWN_from_txt(
 
     # Create NWN graph
     NWN = NanowireNetwork(
-        wire_length = None,
-        length = length,
-        width = width, 
-        shape = shape,
-        wire_density = 0, 
-        wire_num = 0,
-        junction_conductance = conductance,
-        junction_capacitance = None,
-        wire_diameter = diameter,
-        wire_resistivity = resistivity,
-        electrode_list = [],
-        lines = [],
-        type = "JDA",
-        units = units,
-        loc = {},
-        node_indices = {},
+        wire_length=None,
+        length=length,
+        width=width,
+        shape=shape,
+        wire_density=0,
+        wire_num=0,
+        junction_conductance=conductance,
+        junction_capacitance=None,
+        wire_diameter=diameter,
+        wire_resistivity=resistivity,
+        electrode_list=[],
+        lines=[],
+        type="JDA",
+        units=units,
+        loc={},
+        node_indices={},
     )
 
     # Split lines
@@ -101,7 +102,7 @@ def create_NWN_from_txt(
     # Add wires to the graph
     add_wires(NWN, electrode_lines, [True] * len(electrode_lines))
     add_wires(NWN, wire_lines, [False] * len(wire_lines))
-    
+
     # Find junction density
     NWN.graph["junction_density"] = len(NWN.graph["loc"].keys()) / area
 

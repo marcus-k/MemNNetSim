@@ -68,7 +68,9 @@ def create_line(
     try:
         dist = getattr(rng, angle_dist)
     except AttributeError as e:
-        raise ValueError("Distribution not found in 'numpy.random.Generator'") from e
+        raise ValueError(
+            "Distribution not found in 'numpy.random.Generator'"
+        ) from e
 
     # Randomly generate midpoints
     xmid = rng.uniform(xmin, xmax)

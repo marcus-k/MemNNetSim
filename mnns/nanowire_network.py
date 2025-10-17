@@ -27,6 +27,7 @@ from .line_functions import create_line
 from .nanowires import add_wires, convert_NWN_to_MNR
 from . import models
 
+
 class ParameterNotSetError(Exception):
     """
     Raised when an parameter that needs to used has not been set yet.
@@ -40,6 +41,7 @@ class ParameterNotSetError(Exception):
         Explanation of the error.
 
     """
+
     def __init__(self, message: str, param: Any | None = None):
         super().__init__(message)
         self.param = param
@@ -48,7 +50,7 @@ class ParameterNotSetError(Exception):
 class NanowireNetwork(nx.Graph):
     """
     Internal nanowire network object. Should not be instantiated directly.
-    Use [`mnns.create_NWN`](nanowire_network.md#mnns.nanowire_network.create_NWN) 
+    Use [`mnns.create_NWN`](nanowire_network.md#mnns.nanowire_network.create_NWN)
     instead.
 
     Parameters
@@ -60,6 +62,7 @@ class NanowireNetwork(nx.Graph):
         Keyword arguments. Same as networkx.Graph object.
 
     """
+
     def __init__(self, incoming_graph_data=None, **attr):
         super().__init__(incoming_graph_data, **attr)
         self._resist_func = None
@@ -114,12 +117,12 @@ class NanowireNetwork(nx.Graph):
     @property
     def loc(self) -> dict[tuple[int, int], Point]:
         """
-        Dictionary of graph edge locations (nanowire junctions). Only 
-        represents anything meaningful for JDA NWNs. MNR NWNs do not update 
+        Dictionary of graph edge locations (nanowire junctions). Only
+        represents anything meaningful for JDA NWNs. MNR NWNs do not update
         this value. Indexes with a NWNEdge but without the nested tuples.
 
         Does not have a guaranteed ordering.
-        
+
         """
         return self.graph["loc"]
 
@@ -130,11 +133,15 @@ class NanowireNetwork(nx.Graph):
     def get_node(self, index: NWNNodeIndex) -> NWNNode:
         """Return the node corresponding to the index."""
         try:
-            return next(k for k, v in self.graph["node_indices"].items() if v == index)
+            return next(
+                k for k, v in self.graph["node_indices"].items() if v == index
+            )
         except StopIteration as e:
             raise ValueError("given index does not have a node") from e
 
-    def get_index_from_edge(self, edge: NWNEdge | list[NWNEdge]) -> NWNEdgeIndex | list[NWNEdgeIndex]:
+    def get_index_from_edge(
+        self, edge: NWNEdge | list[NWNEdge]
+    ) -> NWNEdgeIndex | list[NWNEdgeIndex]:
         """Return the indices of the nodes in the edge as a tuple."""
         if isinstance(edge, list):
             return [tuple(map(self.get_index, e)) for e in edge]
@@ -148,34 +155,40 @@ class NanowireNetwork(nx.Graph):
     @property
     def wire_junctions(self) -> list[NWNEdge]:
         """
-        Return a list of edges with the "type" attribute set to "junction". 
-        Once called, the list is cached so the ordering can be fixed. If wires 
+        Return a list of edges with the "type" attribute set to "junction".
+        Once called, the list is cached so the ordering can be fixed. If wires
         are added, clear the cache by deleting the property.
 
         """
         if self._wire_junctions is None:
-            self._wire_junctions = [(u, v) for u, v, d in self.edges(data=True) if d["type"] == "junction"]
+            self._wire_junctions = [
+                (u, v)
+                for u, v, d in self.edges(data=True)
+                if d["type"] == "junction"
+            ]
 
         return self._wire_junctions
-    
+
     @wire_junctions.deleter
     def wire_junctions(self) -> None:
         self._wire_junctions = None
         self.wire_junction_indices.cache_clear()
 
     @lru_cache
-    def wire_junction_indices(self) -> tuple[list[NWNNodeIndex], list[NWNNodeIndex]]:
+    def wire_junction_indices(
+        self,
+    ) -> tuple[list[NWNNodeIndex], list[NWNNodeIndex]]:
         """
         Return the start and end indices of the wire junctions in the network
         as a tuple of lists.
-        
+
         """
         return np.asarray(self.get_index_from_edge(self.wire_junctions)).T
-    
+
     @property
     def state_vars(self) -> list[str]:
         return self._state_vars
-    
+
     @state_vars.setter
     def state_vars(self, names: list[str]) -> None:
         self._state_vars = names
@@ -183,7 +196,7 @@ class NanowireNetwork(nx.Graph):
 
     @property
     def resistance_function(
-        self
+        self,
     ) -> Callable[[NanowireNetwork, npt.ArrayLike], npt.ArrayLike]:
         """
         Resistance function of the nanowire network. Should have the calling
@@ -202,8 +215,8 @@ class NanowireNetwork(nx.Graph):
 
     @resistance_function.setter
     def resistance_function(
-        self, 
-        func: str | Callable[[NanowireNetwork, npt.ArrayLike], npt.ArrayLike]
+        self,
+        func: str | Callable[[NanowireNetwork, npt.ArrayLike], npt.ArrayLike],
     ) -> None:
         if func == "linear":
             self._resist_func = models.resist_func
@@ -217,7 +230,7 @@ class NanowireNetwork(nx.Graph):
         edge_list: list[NWNEdge] | None = None,
     ) -> None:
         """
-        Set the state variable of the memristors (nanowire network wire 
+        Set the state variable of the memristors (nanowire network wire
         junctions) in the network.
 
         Parameters
@@ -242,31 +255,37 @@ class NanowireNetwork(nx.Graph):
                 f"'{var_name}' is not in {cls.__qualname__}.state_vars (currently is {self.state_vars})."
                 f"\nDid you set it using {cls.__qualname__}.state_vars = ['{var_name}', ...]?"
             )
-        
+
         edge_list = self.wire_junctions if edge_list is None else edge_list
 
         # Set the state variable for the given edges to the same value...
         if value.size == 1:
-            nx.set_edge_attributes(self, {
-                edge: {var_name: value[0]} for edge in edge_list
-            })
+            nx.set_edge_attributes(
+                self, {edge: {var_name: value[0]} for edge in edge_list}
+            )
 
         # or to different values
         elif value.size == len(edge_list):
-            nx.set_edge_attributes(self, {
-                edge: {var_name: value[i]} for i, edge in enumerate(edge_list)
-            })
+            nx.set_edge_attributes(
+                self,
+                {
+                    edge: {var_name: value[i]}
+                    for i, edge in enumerate(edge_list)
+                },
+            )
 
         else:
             raise ValueError(
                 f"Length of value array ({value.size}) does not match the number of edges ({len(edge_list)})."
             )
-        
+
         self._state_vars_is_set[var_name] = True
-        
-    def get_state_var(self, var_name: str, edge_list: list[NWNEdge] | None = None) -> npt.ArrayLike:
+
+    def get_state_var(
+        self, var_name: str, edge_list: list[NWNEdge] | None = None
+    ) -> npt.ArrayLike:
         """
-        Get the state variable of the memristors (nanowire network wire 
+        Get the state variable of the memristors (nanowire network wire
         junctions) in the network.
 
         Parameters
@@ -295,26 +314,30 @@ class NanowireNetwork(nx.Graph):
             edge_list = self.wire_junctions
 
         try:
-            return np.array([self[edge[0]][edge[1]][var_name] for edge in edge_list])
+            return np.array(
+                [self[edge[0]][edge[1]][var_name] for edge in edge_list]
+            )
         except KeyError as e:
-            raise ParameterNotSetError(f"'{var_name}' has not been set yet using `set_state_var`.") from e
+            raise ParameterNotSetError(
+                f"'{var_name}' has not been set yet using `set_state_var`."
+            ) from e
 
     def update_resistance(
-        self, 
-        state_var_vals: npt.ArrayLike | list[npt.ArrayLike], 
-        edge_list: list[NWNEdge] | None = None
+        self,
+        state_var_vals: npt.ArrayLike | list[npt.ArrayLike],
+        edge_list: list[NWNEdge] | None = None,
     ) -> None:
         """
         Update the resistance of the nanowire network based on the provided
-        state variable values. The resistance function should be set before 
+        state variable values. The resistance function should be set before
         calling this method.
 
         Parameters
         ----------
         state_var_vals : ndarray or list of ndarrays
-            An array of values of the state variables to use in the resistance 
-            function. The should be in the same order as the state variables. 
-            If the resistance function takes multiple state variables, pass a 
+            An array of values of the state variables to use in the resistance
+            function. The should be in the same order as the state variables.
+            If the resistance function takes multiple state variables, pass a
             list of arrays in the same order as `NanowireNetwork.state_vars`.
 
         edge_list : list of edges, optional
@@ -330,7 +353,9 @@ class NanowireNetwork(nx.Graph):
 
         """
         if self.resistance_function is None:
-            raise ParameterNotSetError("Resistance function attribute must be set before updating resistance.")
+            raise ParameterNotSetError(
+                "Resistance function attribute must be set before updating resistance."
+            )
 
         if not isinstance(state_var_vals, list):
             state_var_vals = [state_var_vals]
@@ -340,7 +365,7 @@ class NanowireNetwork(nx.Graph):
 
         R = self.resistance_function(self, *state_var_vals)
         attrs = {
-            edge: {"conductance": 1 / R[i]} for i, edge in enumerate(edge_list)   
+            edge: {"conductance": 1 / R[i]} for i, edge in enumerate(edge_list)
         }
         nx.set_edge_attributes(self, attrs)
 
@@ -365,9 +390,9 @@ class NanowireNetwork(nx.Graph):
             Model to use for the evolution. Should be a function with the
             signature `func(t, y, *args)` where `t` is the time, `y` is the
             state variable(s), and `args` are any additional arguments.
-            Pre-implemented models include: 
+            Pre-implemented models include:
             [`mnns.models.HP_model`](models.md#mnns.models.HP_model),
-            [`mnns.models.decay_HP_model`](models.md#mnns.models.decay_HP_model), 
+            [`mnns.models.decay_HP_model`](models.md#mnns.models.decay_HP_model),
             and [`mnns.models.SLT_HP_model`](models.md#mnns.models.SLT_HP_model).
 
         t_eval : ndarray
@@ -378,22 +403,24 @@ class NanowireNetwork(nx.Graph):
             state variables in `self.state_vars` will be used.
 
         args : tuple, optional
-            Additional arguments to pass to the model function. Most likely, 
-            you will need to provide args for the source node(s), drain node(s) 
+            Additional arguments to pass to the model function. Most likely,
+            you will need to provide args for the source node(s), drain node(s)
             and voltage function.
 
         ivp_options : dict, optional
             Additional keyword arguments to pass to the IVP solver.
-        
-        """        
+
+        """
         if state_vars is None:
             state_vars = self.state_vars
 
         # Check if state variables are set
         if not all([self._state_vars_is_set[var] for var in state_vars]):
-            raise ParameterNotSetError("Not all state variables have not been set yet.")
-        
-        # Get initial state variable, if there are more than one, they 
+            raise ParameterNotSetError(
+                "Not all state variables have not been set yet."
+            )
+
+        # Get initial state variable, if there are more than one, they
         # will be concatenated.
         y0 = np.hstack([self.get_state_var(var) for var in state_vars])
 
@@ -426,7 +453,7 @@ class NanowireNetwork(nx.Graph):
             "Wire junctions": self.n_wire_junctions,
             "Length": f"{self.graph['length'] * self.units['l0']:#.4g} um ({self.graph['length']:#.4g} l0)",
             "Width": f"{self.graph['width'] * self.units['l0']:#.4g} um ({self.graph['width']:#.4g} l0)",
-            "Wire Density": f"{self.graph['wire_density'] / self.units['l0']**2:#.4g} um^-2 ({self.graph['wire_density']:#.4g} l0^-2)"
+            "Wire Density": f"{self.graph['wire_density'] / self.units['l0']**2:#.4g} um^-2 ({self.graph['wire_density']:#.4g} l0^-2)",
         }
         # Get max key length
         m = max(map(len, list(d.keys())))
@@ -450,20 +477,20 @@ def create_NWN(
     angle_kwargs: dict | None = None,
 ) -> NanowireNetwork:
     """
-    Create a nanowire network represented by a NetworkX graph. Wires are 
-    represented by the graph's vertices, while the wire junctions are 
+    Create a nanowire network represented by a NetworkX graph. Wires are
+    represented by the graph's vertices, while the wire junctions are
     represented by the graph's edges.
 
     The nanowire network starts in the junction-dominated assumption (JDA), but
-    can be converted to the multi-nodal representation (MNR) after creation. 
+    can be converted to the multi-nodal representation (MNR) after creation.
 
-    The desired density may not be attainable with the given shape, as there 
-    can only be a integer number of wires. Thus, the closest density to an 
+    The desired density may not be attainable with the given shape, as there
+    can only be a integer number of wires. Thus, the closest density to an
     integer number of wires is used and stored as an attribute (see
     [NWN Attributes](../../attributes.md) for more information).
 
-    See [`mnns.NWNUnits`](units.md#mnns.units.NWNUnits) for the units used by 
-    the parameters. 
+    See [`mnns.NWNUnits`](units.md#mnns.units.NWNUnits) for the units used by
+    the parameters.
 
     Parameters
     ----------
@@ -474,8 +501,8 @@ def create_NWN(
         The shape of the nanowire network given in units of l0. Assumed to
         have the shape of (x-length, y-length).
 
-        The x direction is labeled `length`, while the y direction is labeled 
-        `width`. 
+        The x direction is labeled `length`, while the y direction is labeled
+        `width`.
 
     density : float, optional
         Density of nanowires in the area determined by the width.
@@ -499,7 +526,7 @@ def create_NWN(
         The resistivity of each nanowire. Given in units of rho0.
 
     units : dict, optional
-        Dictionary of custom base units. Defaults to None which will use the 
+        Dictionary of custom base units. Defaults to None which will use the
         default units given in `units.py`
 
     Returns
@@ -522,22 +549,22 @@ def create_NWN(
 
     # Create NWN graph
     NWN = NanowireNetwork(
-        wire_length = wire_length,
-        length = length,
-        width = width,
-        shape = shape,
-        wire_density = density,
-        wire_num = 0,
-        junction_conductance = conductance,
-        junction_capacitance = capacitance,
-        wire_diameter = diameter,
-        wire_resistivity = resistivity,
-        electrode_list = [],
-        lines = [],
-        type = "JDA",
-        units = units,
-        loc = {},
-        node_indices = {},
+        wire_length=wire_length,
+        length=length,
+        width=width,
+        shape=shape,
+        wire_density=density,
+        wire_num=0,
+        junction_conductance=conductance,
+        junction_capacitance=capacitance,
+        wire_diameter=diameter,
+        wire_resistivity=resistivity,
+        electrode_list=[],
+        lines=[],
+        type="JDA",
+        units=units,
+        loc={},
+        node_indices={},
     )
 
     # Create seeded random generator for testing
@@ -548,7 +575,12 @@ def create_NWN(
     for _ in range(wire_num):
         lines.append(
             create_line(
-                length=wire_length, xmax=length, ymax=width, rng=rng, angle_dist=angle_dist, angle_kwargs=angle_kwargs
+                length=wire_length,
+                xmax=length,
+                ymax=width,
+                rng=rng,
+                angle_dist=angle_dist,
+                angle_kwargs=angle_kwargs,
             )
         )
 

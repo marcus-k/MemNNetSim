@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 
+#
 # Author: Marcus Kasdorf
 # Date:   July 26, 2021
 """
@@ -14,6 +14,7 @@ from shapely.geometry import LineString
 
 from .typing import *
 from typing import Iterable, TYPE_CHECKING
+
 if TYPE_CHECKING:
     from .nanowire_network import NanowireNetwork
 
@@ -39,11 +40,11 @@ def convert_NWN_to_MNR(NWN: NanowireNetwork):
     rho0 = NWN.graph["units"]["rho0"]
     Ron = NWN.graph["units"]["Ron"]
     D0 = NWN.graph["units"]["D0"]
-    A0 = D0*D0
+    A0 = D0 * D0
 
     rho = NWN.graph["wire_resistivity"]
     D = NWN.graph["wire_diameter"]
-    A = np.pi/4 * D*D
+    A = np.pi / 4 * D * D
 
     for i in range(NWN.graph["wire_num"]):
         # Get the junctions for a wire
@@ -51,7 +52,8 @@ def convert_NWN_to_MNR(NWN: NanowireNetwork):
 
         # Get location of the junction for a wire
         junction_locs = {
-            edge: NWN.graph["loc"][tuple(sorted([edge[0][0], edge[1][0]]))] for edge in junctions
+            edge: NWN.graph["loc"][tuple(sorted([edge[0][0], edge[1][0]]))]
+            for edge in junctions
         }
 
         # Add junctions as part of the LineString that makes up the wire
@@ -82,15 +84,18 @@ def convert_NWN_to_MNR(NWN: NanowireNetwork):
         # Add edges between subnodes
         for ind, next_ind in zip(ordering, ordering[1:]):
             # Find inner-wire resistance
-            L = NWN.nodes[(i, ind)]["loc"].distance(NWN.nodes[(i, next_ind)]["loc"])
+            L = NWN.nodes[(i, ind)]["loc"].distance(
+                NWN.nodes[(i, next_ind)]["loc"]
+            )
             wire_conductance = (Ron * A0 * A) / (rho0 * l0 * rho * L * 1e3)
 
             # Add inner-wire edge
             NWN.add_edge(
-                (i, ind), (i, next_ind), 
-                conductance = wire_conductance, 
-                capacitance = 0,
-                type = "inner"
+                (i, ind),
+                (i, next_ind),
+                conductance=wire_conductance,
+                capacitance=0,
+                type="inner",
             )
 
     # Update index lookup
@@ -100,13 +105,13 @@ def convert_NWN_to_MNR(NWN: NanowireNetwork):
 
 
 def add_wires(
-    NWN: NanowireNetwork, 
-    lines: list[LineString], 
-    electrodes: list[bool], 
-    resistance: float = None
+    NWN: NanowireNetwork,
+    lines: list[LineString],
+    electrodes: list[bool],
+    resistance: float = None,
 ) -> list[JDANode]:
     """
-    Adds wires to a given nanowire network in-place. Returns the nodes of the 
+    Adds wires to a given nanowire network in-place. Returns the nodes of the
     added wires in order.
 
     Currently, adding a wire that already exists breaks things.
@@ -132,7 +137,7 @@ def add_wires(
     -------
     new_wire_nodes : list of tuples
         List of the newly added nodes in the same order in `lines`.
-    
+
     """
     if NWN.graph["type"] != "JDA":
         raise NotImplementedError("Only JDA is currently supported")
@@ -140,7 +145,9 @@ def add_wires(
     new_wire_num = len(lines)
 
     if new_wire_num != len(electrodes):
-        raise ValueError("Length of new lines list must equal length of electrode boolean list.")
+        raise ValueError(
+            "Length of new lines list must equal length of electrode boolean list."
+        )
 
     # Update wire number in NWN
     start_ind = NWN.graph["wire_num"]
@@ -154,25 +161,26 @@ def add_wires(
         # Create new node
         NWN.graph["lines"].append(lines[i])
         new_wire_nodes.append((start_ind + i,))
-        NWN.add_node(
-            (start_ind + i,), 
-            electrode = electrodes[i]
-        )
-        
+        NWN.add_node((start_ind + i,), electrode=electrodes[i])
+
         # Keep track of the electrodes
         if electrodes[i]:
             NWN.graph["electrode_list"].append((start_ind + i,))
 
         # Find intersects
         intersect_dict = find_line_intersects(start_ind + i, NWN.graph["lines"])
-        
+
         # Add edges to NWN
-        conductance = 1 / resistance if resistance is not None else NWN.graph["junction_conductance"]
+        conductance = (
+            1 / resistance
+            if resistance is not None
+            else NWN.graph["junction_conductance"]
+        )
         NWN.add_edges_from(
-            [((key[0],), (key[1],)) for key in intersect_dict.keys()], 
-            conductance = conductance,
-            capacitance = NWN.graph["junction_capacitance"],
-            type = "junction"
+            [((key[0],), (key[1],)) for key in intersect_dict.keys()],
+            conductance=conductance,
+            capacitance=NWN.graph["junction_capacitance"],
+            type="junction",
         )
         NWN.graph["loc"].update(intersect_dict)
 
@@ -181,7 +189,9 @@ def add_wires(
 
     # Update wire density
     area = NWN.graph["length"] * NWN.graph["width"]
-    NWN.graph["wire_density"] = (NWN.graph["wire_num"] - len(NWN.graph["electrode_list"])) / area
+    NWN.graph["wire_density"] = (
+        NWN.graph["wire_num"] - len(NWN.graph["electrode_list"])
+    ) / area
 
     # Clear current junction list
     del NWN.wire_junctions
@@ -189,9 +199,9 @@ def add_wires(
     return new_wire_nodes
 
 
-def add_electrodes(NWN: NanowireNetwork, *args)  -> list[JDANode]:
+def add_electrodes(NWN: NanowireNetwork, *args) -> list[JDANode]:
     """
-    Convenience function for adding electrodes on the edges of a network 
+    Convenience function for adding electrodes on the edges of a network
     in-place. Returns the nodes of the added electrodes in order.
 
     Can be called in two ways:
@@ -219,7 +229,7 @@ def add_electrodes(NWN: NanowireNetwork, *args)  -> list[JDANode]:
     new_wire_nodes : list of tuples
         List of the newly added nodes. If strings were passed, the list
         follows the order passed. If iterables were passed, the list is
-        ordered from left-to-right or bottom-to-top concatenated. 
+        ordered from left-to-right or bottom-to-top concatenated.
 
     """
     length = NWN.graph["length"]
@@ -266,41 +276,53 @@ def add_electrodes(NWN: NanowireNetwork, *args)  -> list[JDANode]:
                     delta = offsets[i]
                     start = (i / num * width) + (spacing / 2)
                     end = ((i + 1) / num * width) - (spacing / 2)
-                    line_list.append(LineString(
-                        [(0, start + delta), (0, end + delta)]))
+                    line_list.append(
+                        LineString([(0, start + delta), (0, end + delta)])
+                    )
             elif side == "right":
                 for i in range(num):
                     delta = offsets[i]
                     start = (i / num * width) + (spacing / 2)
                     end = ((i + 1) / num * width) - (spacing / 2)
-                    line_list.append(LineString(
-                        [(length, start + delta), (length, end + delta)]))
+                    line_list.append(
+                        LineString(
+                            [(length, start + delta), (length, end + delta)]
+                        )
+                    )
             elif side == "top":
                 for i in range(num):
                     delta = offsets[i]
                     start = (i / num * length) + (spacing / 2)
                     end = ((i + 1) / num * length) - (spacing / 2)
-                    line_list.append(LineString(
-                        [(start + delta, width), (end + delta, width)]))
+                    line_list.append(
+                        LineString(
+                            [(start + delta, width), (end + delta, width)]
+                        )
+                    )
             elif side == "bottom":
                 for i in range(num):
                     delta = offsets[i]
                     start = (i / num * length) + (spacing / 2)
                     end = ((i + 1) / num * length) - (spacing / 2)
-                    line_list.append(LineString(
-                        [(start + delta, 0), (end + delta, 0)]))
+                    line_list.append(
+                        LineString([(start + delta, 0), (end + delta, 0)])
+                    )
             else:
                 raise ValueError(f"Invalid side: {side}")
-      
+
     else:
-        raise ValueError("Arguments after NWN must be all strings or all lists.")
-        
+        raise ValueError(
+            "Arguments after NWN must be all strings or all lists."
+        )
+
     # Add wires to the network
     new_wire_nodes = add_wires(NWN, line_list, [True] * len(line_list))
     return new_wire_nodes
 
 
-def get_edge_indices(NWN: NanowireNetwork, edges: list[NWNEdge]) -> tuple[list[NWNNodeIndex], list[NWNNodeIndex]]:
+def get_edge_indices(
+    NWN: NanowireNetwork, edges: list[NWNEdge]
+) -> tuple[list[NWNNodeIndex], list[NWNNodeIndex]]:
     """
     Given a NWN and a list of edges, returns two lists: one of the indices of
     the first nodes in the input edge list, and one of the second.
@@ -316,8 +338,9 @@ def get_edge_indices(NWN: NanowireNetwork, edges: list[NWNEdge]) -> tuple[list[N
     """
     # JDA edge indices
     if NWN.graph["type"] == "JDA":
-        start_nodes, end_nodes = map(list, 
-            zip(*[(*n1, *n2) for n1, n2 in edges]))
+        start_nodes, end_nodes = map(
+            list, zip(*[(*n1, *n2) for n1, n2 in edges])
+        )
 
     # MNR edge indices
     elif NWN.graph["type"] == "MNR":

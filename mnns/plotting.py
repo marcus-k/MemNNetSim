@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 
+#
 # Author: Marcus Kasdorf
 # Date:   July 8, 2021
 """
@@ -18,8 +18,8 @@ from matplotlib.axes import Axes
 
 
 def plot_NWN(
-    NWN: nx.Graph, 
-    intersections: bool = True, 
+    NWN: nx.Graph,
+    intersections: bool = True,
     rnd_color: bool = False,
     scaled: bool = False,
     grid: bool = True,
@@ -70,8 +70,12 @@ def plot_NWN(
     # Plot intersection plots if required
     if intersections:
         ax.scatter(
-            *np.array([(point.x, point.y) for point in NWN.graph["loc"].values()]).T, 
-            zorder=10, s=5, c="blue"
+            *np.array(
+                [(point.x, point.y) for point in NWN.graph["loc"].values()]
+            ).T,
+            zorder=10,
+            s=5,
+            c="blue",
         )
 
     # Defaults to blue and pink lines, else random colors are used.
@@ -81,7 +85,10 @@ def plot_NWN(
     else:
         for i in range(NWN.graph["wire_num"]):
             if (i,) in NWN.graph["electrode_list"]:
-                ax.plot(*np.asarray(NWN.graph["lines"][i].coords).T, c="xkcd:light blue")
+                ax.plot(
+                    *np.asarray(NWN.graph["lines"][i].coords).T,
+                    c="xkcd:light blue",
+                )
             else:
                 ax.plot(*np.asarray(NWN.graph["lines"][i].coords).T, c="pink")
 
@@ -95,25 +102,25 @@ def plot_NWN(
         )
 
     # Other attributes
-    if grid: 
+    if grid:
         ax.grid(alpha=0.25)
-    if xlabel: 
+    if xlabel:
         ax.set_xlabel(xlabel)
-    if ylabel: 
+    if ylabel:
         ax.set_ylabel(ylabel)
 
     return fig, ax
 
 
 def draw_NWN(
-    NWN: nx.Graph, 
+    NWN: nx.Graph,
     figsize: tuple = None,
     font_size: int = 8,
     node_labels: np.ndarray = None,
     fmt: str = ".2f",
     edge_colors: np.ndarray = None,
     cbar_label: str = "Colorbar",
-    cmap = plt.cm.RdYlBu_r,
+    cmap=plt.cm.RdYlBu_r,
 ) -> tuple[Figure, Axes]:
     """
     Draw the given nanowire network as a networkx graph. JDA drawing is more
@@ -164,33 +171,46 @@ def draw_NWN(
         kwargs = dict()
 
         # Nodes are placed at the center of the wire
-        kwargs.update({
-            "pos": {(i,): np.asarray(*NWN.graph["lines"][i].centroid.coords) 
-                for i in range(NWN.graph["wire_num"])}
-        })
+        kwargs.update(
+            {
+                "pos": {
+                    (i,): np.asarray(*NWN.graph["lines"][i].centroid.coords)
+                    for i in range(NWN.graph["wire_num"])
+                }
+            }
+        )
 
         # Label node voltages if sol is given, else just label as nodes numbers
         if node_labels is not None:
-            kwargs.update({
-                "labels": {(key,): f"{value:{fmt}}" 
-                    for key, value in zip(range(NWN.graph["wire_num"]), node_labels)}
-            })
+            kwargs.update(
+                {
+                    "labels": {
+                        (key,): f"{value:{fmt}}"
+                        for key, value in zip(
+                            range(NWN.graph["wire_num"]), node_labels
+                        )
+                    }
+                }
+            )
         else:
-            kwargs.update({
-                "labels": {(i,): i for i in range(NWN.graph["wire_num"])}
-            })
+            kwargs.update(
+                {"labels": {(i,): i for i in range(NWN.graph["wire_num"])}}
+            )
 
         # Add edges colors if weights are passed
         if edge_colors is not None:
-            kwargs.update({
-                "edgelist": NWN.edges, 
-                "edge_color": edge_colors, 
-                "edge_cmap": cmap
-            })
+            kwargs.update(
+                {
+                    "edgelist": NWN.edges,
+                    "edge_color": edge_colors,
+                    "edge_cmap": cmap,
+                }
+            )
 
             # Add a colorbar to the network plot
             norm = mpl.colors.Normalize(
-                vmin=np.nanmin(edge_colors), vmax=np.nanmax(edge_colors))
+                vmin=np.nanmin(edge_colors), vmax=np.nanmax(edge_colors)
+            )
 
             cax = fig.add_axes([0.95, 0.2, 0.02, 0.6])
             cb = mpl.colorbar.ColorbarBase(cax, norm=norm, cmap=cmap)
@@ -207,15 +227,24 @@ def draw_NWN(
     elif NWN.graph["type"] == "MNR":
         kwargs = {}
         if node_labels is not None:
-            labels = {node: f"{value:{fmt}}" for node, value in zip(sorted(NWN.nodes()), node_labels)}
+            labels = {
+                node: f"{value:{fmt}}"
+                for node, value in zip(sorted(NWN.nodes()), node_labels)
+            }
             kwargs.update({"labels": labels})
         else:
             kwargs.update({"with_labels": True})
 
-        nx.draw(NWN, ax=ax, node_size=40, font_size=font_size, edge_color="r", **kwargs)
+        nx.draw(
+            NWN,
+            ax=ax,
+            node_size=40,
+            font_size=font_size,
+            edge_color="r",
+            **kwargs,
+        )
 
     else:
         raise ValueError("Nanowire network has invalid type.")
 
     return fig, ax
-

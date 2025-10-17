@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 
+#
 # Author: Marcus Kasdorf
 # Date:   July 19, 2021
 """
@@ -18,11 +18,14 @@ from networkx.linalg import laplacian_matrix
 from .typing import *
 from .nanowires import get_edge_indices
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from .nanowire_network import NanowireNetwork
 
 
-def get_connected_nodes(NWN: NanowireNetwork, connected: list[NWNNode]) -> set[NWNNode]:
+def get_connected_nodes(
+    NWN: NanowireNetwork, connected: list[NWNNode]
+) -> set[NWNNode]:
     """
     Returns a list of nodes which are connected to any of the given nodes.
 
@@ -39,8 +42,8 @@ def create_matrix(
     value_type: str = "conductance",
     source_nodes: list[NWNNode] = None,
     drain_nodes: list[NWNNode] = None,
-    ground_nodes: bool = False
-) -> scipy.sparse.csr_matrix: 
+    ground_nodes: bool = False,
+) -> scipy.sparse.csr_matrix:
     """
     Create the Laplacian connectivity matrix.
 
@@ -57,7 +60,7 @@ def create_matrix(
         grounded. Default: None.
 
     drain_nodes : list of tuples, optional
-        If a drain node is supplied, the row and column corresponding to 
+        If a drain node is supplied, the row and column corresponding to
         the drain node are zeros and a one is placed at the row-column
         intersection. Default: None.
 
@@ -92,8 +95,11 @@ def create_matrix(
         # Get list of node indices which are not connected to an electrode
         unconnected_indices = list(
             set(NWN.graph["node_indices"].values()).difference(
-                set(NWN.graph["node_indices"][node] for node in 
-                    get_connected_nodes(NWN, [*source_nodes, *drain_nodes])
+                set(
+                    NWN.graph["node_indices"][node]
+                    for node in get_connected_nodes(
+                        NWN, [*source_nodes, *drain_nodes]
+                    )
                 )
             )
         )
@@ -103,8 +109,7 @@ def create_matrix(
 
         # Add small value to diagonal, grounding all non-connected nodes
         M += scipy.sparse.dia_matrix(
-            (small, [0]), 
-            shape = (nodelist_len, nodelist_len)
+            (small, [0]), shape=(nodelist_len, nodelist_len)
         )
 
     # Zero each of the drain nodes' row and column
@@ -134,17 +139,17 @@ def _solver(A, z, solver, **kwargs):
         x, exit_code = scipy.sparse.linalg.gcrotmk(A, z.toarray(), **kwargs)
     else:
         raise ValueError("Not implemented solver.")
-    
+
     return x
 
 
 def _solve_voltage(
-    NWN: NanowireNetwork, 
-    voltage: float, 
-    source_nodes: list[NWNNode], 
+    NWN: NanowireNetwork,
+    voltage: float,
+    source_nodes: list[NWNNode],
     drain_nodes: list[NWNNode],
     solver: str,
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
     Solve for voltages at all the nodes for a given supplied voltage.
@@ -157,7 +162,9 @@ def _solve_voltage(
     # Ground nodes only if needed
     ground_nodes = True if solver == "spsolve" else False
 
-    G = -create_matrix(NWN, "conductance", source_nodes, drain_nodes, ground_nodes)
+    G = -create_matrix(
+        NWN, "conductance", source_nodes, drain_nodes, ground_nodes
+    )
     B = scipy.sparse.dok_matrix((len(nodelist), len(source_indices)))
     for i, ind in enumerate(source_indices):
         B[ind, i] = 1
@@ -166,19 +173,19 @@ def _solve_voltage(
 
     A = scipy.sparse.bmat([[G, B], [C, D]])
     z = scipy.sparse.dok_matrix((len(nodelist) + len(source_indices), 1))
-    z[len(nodelist):] = voltage
+    z[len(nodelist) :] = voltage
 
     out = _solver(A, z, solver, **kwargs)
     return np.array(out, copy=False)
 
 
-def _solve_current(    
-    NWN: NanowireNetwork, 
-    current: float, 
-    source_nodes: list[NWNNode], 
+def _solve_current(
+    NWN: NanowireNetwork,
+    current: float,
+    source_nodes: list[NWNNode],
     drain_nodes: list[NWNNode],
     solver: str,
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
     Solve for voltages at all the nodes for a given supplied current.
@@ -190,7 +197,9 @@ def _solve_current(
 
     ground_nodes = True if solver == "spsolve" else False
 
-    G = create_matrix(NWN, "conductance", source_nodes, drain_nodes, ground_nodes)
+    G = create_matrix(
+        NWN, "conductance", source_nodes, drain_nodes, ground_nodes
+    )
     z = scipy.sparse.dok_matrix((len(nodelist), 1))
     z[source_indices] = current
 
@@ -199,17 +208,17 @@ def _solve_current(
 
 
 def solve_network(
-    NWN: NanowireNetwork, 
-    source_node: NWNNode | list[NWNNode], 
-    drain_node: NWNNode | list[NWNNode], 
+    NWN: NanowireNetwork,
+    source_node: NWNNode | list[NWNNode],
+    drain_node: NWNNode | list[NWNNode],
     input: float,
     type: str = "voltage",
     solver: str = "spsolve",
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
-    Solve for the voltages of each node in a given NWN. Each drain node will 
-    be grounded. If the type is "voltage", each source node will be at the 
+    Solve for the voltages of each node in a given NWN. Each drain node will
+    be grounded. If the type is "voltage", each source node will be at the
     specified input voltage. If the type is "current", current will be sourced
     from each source node.
 
@@ -241,7 +250,7 @@ def solve_network(
     out : ndarray
         Output array containing the voltages of each node. If the input type
         is voltage, the current is also in this array as the last element.
-        
+
     """
     # Get lists of source and drain nodes
     if isinstance(source_node, tuple):
@@ -251,9 +260,13 @@ def solve_network(
 
     # Pass to solvers
     if type == "voltage":
-        out = _solve_voltage(NWN, input, source_node, drain_node, solver, **kwargs)
+        out = _solve_voltage(
+            NWN, input, source_node, drain_node, solver, **kwargs
+        )
     elif type == "current":
-        out = _solve_current(NWN, input, source_node, drain_node, solver, **kwargs)
+        out = _solve_current(
+            NWN, input, source_node, drain_node, solver, **kwargs
+        )
     else:
         raise ValueError("Invalid source type.")
 
@@ -261,13 +274,13 @@ def solve_network(
 
 
 def solve_drain_current(
-    NWN: NanowireNetwork, 
-    source_node: NWNNode | list[NWNNode], 
-    drain_node: NWNNode | list[NWNNode], 
+    NWN: NanowireNetwork,
+    source_node: NWNNode | list[NWNNode],
+    drain_node: NWNNode | list[NWNNode],
     voltage: float,
     scaled: bool = False,
     solver: str = "spsolve",
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
     Solve for the current through each drain node of a NWN.
@@ -330,13 +343,13 @@ def solve_drain_current(
 
 
 def solve_nodal_current(
-    NWN: NanowireNetwork, 
-    source_node: NWNNode | list[NWNNode], 
-    drain_node: NWNNode | list[NWNNode], 
+    NWN: NanowireNetwork,
+    source_node: NWNNode | list[NWNNode],
+    drain_node: NWNNode | list[NWNNode],
     voltage: float,
     scaled: bool = False,
     solver: str = "spsolve",
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
     Solve for the current entering each node of a NWN. Only the entering
@@ -373,7 +386,7 @@ def solve_nodal_current(
     V_out = solve_network(
         NWN, source_node, drain_node, voltage, "voltage", solver, **kwargs
     )
-    
+
     # Preallocate output
     current_array = np.zeros(len(NWN.nodes))
 
@@ -388,8 +401,9 @@ def solve_nodal_current(
             # Only add current entering a node so we can see how much
             # current passes through. Else, we just get zero due to KCL.
             if V_delta > 0:
-                current_array[node_ind] += (V_delta * 
-                    NWN.edges[edge]["conductance"] * np.sign(voltage))
+                current_array[node_ind] += (
+                    V_delta * NWN.edges[edge]["conductance"] * np.sign(voltage)
+                )
 
     # Scale the output if desired
     if scaled:
@@ -399,13 +413,13 @@ def solve_nodal_current(
 
 
 def solve_edge_current(
-    NWN: NanowireNetwork, 
-    source_node: NWNNode | list[NWNNode], 
-    drain_node: NWNNode | list[NWNNode], 
+    NWN: NanowireNetwork,
+    source_node: NWNNode | list[NWNNode],
+    drain_node: NWNNode | list[NWNNode],
     voltage: float,
     scaled: bool = False,
     solver: str = "spsolve",
-    **kwargs
+    **kwargs,
 ) -> npt.NDArray:
     """
     Solve for the current passing through each edge of a NWN. The direction is
@@ -482,4 +496,3 @@ def scale_sol(NWN: NanowireNetwork, sol: npt.NDArray) -> npt.NDArray:
         out[node_num:] *= i0
 
     return out
-

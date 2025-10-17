@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 #
 # Typing definitions for randomnwn.
-# 
+#
 # Author: Marcus Kasdorf
 # Date:   July 8, 2024
 

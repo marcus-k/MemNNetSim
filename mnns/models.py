@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# 
+#
 # Author: Marcus Kasdorf
 # Date:   July 28, 2021
 """
@@ -15,6 +15,7 @@ import networkx as nx
 import numpy.typing as npt
 from .typing import *
 from typing import Callable, TYPE_CHECKING, Optional
+
 if TYPE_CHECKING:
     from .nanowire_network import NanowireNetwork
 
@@ -22,8 +23,7 @@ from .calculations import solve_network
 
 
 def resist_func(
-    NWN: NanowireNetwork,
-    w: float | npt.NDArray
+    NWN: NanowireNetwork, w: float | npt.NDArray
 ) -> float | npt.NDArray:
     """
     Linear resistance function in nondimensionalized form.
@@ -50,15 +50,15 @@ def resist_func(
 
 
 def HP_model(
-    t: float, 
+    t: float,
     x: npt.NDArray,
     NWN: NanowireNetwork,
-    source_node: NWNNode | list[NWNNode], 
+    source_node: NWNNode | list[NWNNode],
     drain_node: NWNNode | list[NWNNode],
     voltage_func: Callable,
     window_func: Callable,
     solver: str = "spsolve",
-    kwargs: Optional[dict] = None
+    kwargs: Optional[dict] = None,
 ) -> npt.NDArray:
     """
     HP Model [1]. Provides the time derivative of the state variable `x` (the
@@ -74,7 +74,7 @@ def HP_model(
 
     NWN : NanowireNetwork
         Input nanowire network graph.
-    
+
     source_node : NWNNode or list of NWNNode
         Source node(s) of the input voltage.
 
@@ -90,7 +90,7 @@ def HP_model(
         the window function value as an array.
 
     solver : str
-        SciPy sparse matrix equation solver. 
+        SciPy sparse matrix equation solver.
 
     **kwargs
         Keyword arguments to pass to the SciPy sparse matrix equation solver.
@@ -102,7 +102,7 @@ def HP_model(
 
     References
     ----------
-    [1] D. B. Strukov, G. S. Snider, D. R. Stewart and R. S. Williams, 
+    [1] D. B. Strukov, G. S. Snider, D. R. Stewart and R. S. Williams,
         *Nature*, 2008, **453**, 80-83
 
     """
@@ -117,8 +117,7 @@ def HP_model(
 
     # Solve for voltage at each node
     *V, I = solve_network(
-        NWN, source_node, drain_node, applied_V, 
-        "voltage", solver, **kwargs
+        NWN, source_node, drain_node, applied_V, "voltage", solver, **kwargs
     )
     V = np.asarray(V)
 
@@ -129,7 +128,7 @@ def HP_model(
     v0 = V[start]
     v1 = V[end]
     V_delta = np.abs(v0 - v1) * np.sign(applied_V)
-        
+
     # Find dw/dt
     dxdt = V_delta / R * window_func(x)
 
@@ -137,18 +136,18 @@ def HP_model(
 
 
 def decay_HP_model(
-    t: float, 
+    t: float,
     x: npt.NDArray,
     NWN: NanowireNetwork,
-    source_node: NWNNode | list[NWNNode], 
+    source_node: NWNNode | list[NWNNode],
     drain_node: NWNNode | list[NWNNode],
     voltage_func: Callable,
     window_func: Callable,
     solver: str = "spsolve",
-    kwargs: dict = None
+    kwargs: dict = None,
 ) -> npt.NDArray:
     """
-    Decay HP Model [1]. Provides the time derivative of the state variable `x` 
+    Decay HP Model [1]. Provides the time derivative of the state variable `x`
     (the dimensionless version of `w`). Assumes voltage sources are used.
 
     Requires `NWN.graph["tau"]` to be set to the decay constant value.
@@ -163,7 +162,7 @@ def decay_HP_model(
 
     NWN : NanowireNetwork
         Input nanowire network graph.
-    
+
     source_node : NWNNode or list of NWNNode
         Source node(s) of the input voltage.
 
@@ -179,7 +178,7 @@ def decay_HP_model(
         the window function value as an array.
 
     solver : str
-        SciPy sparse matrix equation solver. 
+        SciPy sparse matrix equation solver.
 
     **kwargs
         Keyword arguments to pass to the SciPy sparse matrix equation solver.
@@ -191,7 +190,7 @@ def decay_HP_model(
 
     References
     ----------
-    [1] H. O. Sillin, R. Aguilera, H.-H. Shieh, A. V. Avizienis, M. Aono, 
+    [1] H. O. Sillin, R. Aguilera, H.-H. Shieh, A. V. Avizienis, M. Aono,
         A. Z. Stieg and J. K. Gimzewski, *Nanotechnology*, 2013, **24**, 384004.
 
     """
@@ -206,8 +205,7 @@ def decay_HP_model(
 
     # Solve for voltage at each node
     *V, I = solve_network(
-        NWN, source_node, drain_node, applied_V, 
-        "voltage", solver, **kwargs
+        NWN, source_node, drain_node, applied_V, "voltage", solver, **kwargs
     )
     V = np.array(V)
 
@@ -221,28 +219,29 @@ def decay_HP_model(
 
     # Get decay constant
     tau = NWN.graph["tau"]
-        
+
     # Find dw/dt
     dxdt = (V_delta / R * window_func(x)) - (x / tau)
 
     return dxdt
 
+
 def SLT_HP_model(
-    t: float, 
+    t: float,
     y: npt.NDArray,
     NWN: NanowireNetwork,
-    source_node: NWNNode | list[NWNNode], 
+    source_node: NWNNode | list[NWNNode],
     drain_node: NWNNode | list[NWNNode],
     voltage_func: Callable,
     window_func: Callable,
     solver: str = "spsolve",
-    kwargs: Optional[dict] = None
+    kwargs: Optional[dict] = None,
 ) -> npt.NDArray:
     """
-    SLT HP Model [1]. Provides the time derivative of the state variable `x` 
+    SLT HP Model [1]. Provides the time derivative of the state variable `x`
     (the dimensionless version of `w`), `tau`, and `epsilon`. Assumes that
     these state variable are concatenated into a single 1D array input.
-    
+
     Assumes voltage sources are used.
 
     Requires `NWN.graph["tau"]` to be set to the decay constant value.
@@ -253,12 +252,12 @@ def SLT_HP_model(
         Current time to solve at.
 
     y : ndarray
-        Array containing the state variables `x`, `tau`, and `epsilon` for each 
+        Array containing the state variables `x`, `tau`, and `epsilon` for each
         junction in the NWN concatenated into a single 1D array input.
 
     NWN : NanowireNetwork
         Input nanowire network graph.
-    
+
     source_node : NWNNode or list of NWNNode
         Source node(s) of the input voltage.
 
@@ -274,7 +273,7 @@ def SLT_HP_model(
         the window function value as an array.
 
     solver : str
-        SciPy sparse matrix equation solver. 
+        SciPy sparse matrix equation solver.
 
     **kwargs
         Keyword arguments to pass to the SciPy sparse matrix equation solver.
@@ -282,12 +281,12 @@ def SLT_HP_model(
     Returns
     -------
     dydt : ndarray
-        Array of the time derivative of the state variables `x`, `tau`, and 
+        Array of the time derivative of the state variables `x`, `tau`, and
         `epsilon`, concatenated into a 1D array.
 
     References
     ----------
-    [1] L. Chen, C. Li, T. Huang, H. G. Ahmad and Y. Chen, *Physics Letters A*, 
+    [1] L. Chen, C. Li, T. Huang, H. G. Ahmad and Y. Chen, *Physics Letters A*,
         2014, **378**, 2924-2930
 
     """
@@ -306,8 +305,7 @@ def SLT_HP_model(
 
     # Solve for voltage at each node
     *V, I = solve_network(
-        NWN, source_node, drain_node, applied_V, 
-        "voltage", solver, **kwargs
+        NWN, source_node, drain_node, applied_V, "voltage", solver, **kwargs
     )
     V = np.asarray(V)
 
@@ -318,7 +316,7 @@ def SLT_HP_model(
     v0 = V[start]
     v1 = V[end]
     V_delta = np.abs(v0 - v1) * np.sign(applied_V)
-        
+
     # Find derivatives
     l = V_delta / R
     dw_dt = (l - ((w - epsilon) / tau)) * window_func(w)
@@ -328,9 +326,12 @@ def SLT_HP_model(
 
     return dydt
 
+
 # Legacy functions
 def set_SLT_params(NWN: NanowireNetwork, sigma, theta, a):
     NWN.graph["sigma"] = sigma
     NWN.graph["theta"] = theta
     NWN.graph["a"] = a
+
+
 set_chen_params = set_SLT_params
