@@ -5,23 +5,32 @@
 # Date:   May 20, 2021
 """
 Functions for random lines.
+
 """
 
 import numpy as np
-from numpy.random import uniform
 from shapely.geometry import LineString, Point
 
 
-def create_line(length=1, xmin=0, xmax=1, ymin=0, ymax=1, rng=None) -> LineString:
+def create_line(
+    length: float = 1,
+    xmin: float = 0,
+    xmax: float = 1,
+    ymin: float = 0,
+    ymax: float = 1,
+    rng: np.random.Generator | None = None,
+    angle_dist: str = "uniform",
+    angle_kwargs: dict | None = None,
+) -> LineString:
     """
-    Generate random lines with random orientations with midpoints ranging from 
+    Generate random lines with random orientations with midpoints ranging from
     area from ``xmin`` to ``xmax`` and from ``ymin`` to ``ymax``.
 
     Parameters
     ----------
     length : float
         Length of line
-    
+
     xmin : float
         Minimum x coordinate midpoint.
 
@@ -35,8 +44,8 @@ def create_line(length=1, xmin=0, xmax=1, ymin=0, ymax=1, rng=None) -> LineStrin
         Minimum y coordinate midpoint.
 
     rng : Generator
-        Generator object usually created from ``default_rng`` from 
-        ``numpy.random``. A seeded generator can be passed for consistent 
+        Generator object usually created from ``default_rng`` from
+        ``numpy.random``. A seeded generator can be passed for consistent
         random numbers. If None, uses the default NumPy random functions.
 
     Returns
@@ -45,12 +54,32 @@ def create_line(length=1, xmin=0, xmax=1, ymin=0, ymax=1, rng=None) -> LineStrin
         LineString of the generated line.
 
     """
-    if rng is not None:
-        xmid, ymid, angle = rng.uniform(xmin, xmax), rng.uniform(ymin, ymax), rng.uniform(0, np.pi)
-    else:
-        xmid, ymid, angle = uniform(xmin, xmax), uniform(ymin, ymax), uniform(0, np.pi)
+    # Set default arguments
+    if rng is None:
+        rng = np.random.default_rng()
 
-    xhalf, yhalf = length / 2 * np.cos(angle), length / 2 * np.sin(angle)
+    if angle_kwargs is None:
+        angle_kwargs = dict()
+
+    if angle_dist == "uniform" and not angle_kwargs:
+        angle_kwargs = {"low": 0, "high": np.pi}
+
+    # Get angle distribution
+    try:
+        dist = getattr(rng, angle_dist)
+    except AttributeError as e:
+        raise ValueError("Distribution not found in 'numpy.random.Generator'") from e
+
+    # Randomly generate midpoints
+    xmid = rng.uniform(xmin, xmax)
+    ymid = rng.uniform(ymin, ymax)
+
+    # Randomly generate angle
+    angle = dist(**angle_kwargs)
+
+    # Create the line string object
+    xhalf = length / 2 * np.cos(angle)
+    yhalf = length / 2 * np.sin(angle)
 
     xstart, xend = xmid - xhalf, xmid + xhalf
     ystart, yend = ymid - yhalf, ymid + yhalf
@@ -74,7 +103,7 @@ def find_intersects(lines: list) -> dict[tuple[int, int], Point]:
     Returns
     -------
     out : dict
-        Dictionary where the key is a tuple of the pair of intersecting lines 
+        Dictionary where the key is a tuple of the pair of intersecting lines
         and the value is the intersection locations.
 
     """
@@ -88,7 +117,9 @@ def find_intersects(lines: list) -> dict[tuple[int, int], Point]:
     return out
 
 
-def find_line_intersects(ind: int, lines: list[LineString]) -> dict[tuple[int, int], Point]:
+def find_line_intersects(
+    ind: int, lines: list[LineString]
+) -> dict[tuple[int, int], Point]:
     """
     Given a list of LineStrings, find all the lines that intersect
     with a specified line in the list given by the index ``ind``.
@@ -100,7 +131,7 @@ def find_line_intersects(ind: int, lines: list[LineString]) -> dict[tuple[int, i
         # Skip intersection with the line itself
         if ind == j:
             continue
-        
+
         # Checking if these's an intersection first is faster
         if lines[ind].intersects(lines[j]):
             if ind < j:
@@ -111,15 +142,17 @@ def find_line_intersects(ind: int, lines: list[LineString]) -> dict[tuple[int, i
     return out
 
 
-def add_points_to_line(line: LineString, points: list[Point], return_ordering=False):
+def add_points_to_line(
+    line: LineString, points: list[Point], return_ordering=False
+):
     """
     Given a list of points and a line, add the projected points to the line.
 
-    See general form at: 
+    See general form at:
     https://stackoverflow.com/questions/34754777/shapely-split-linestrings-at-intersections-with-other-linestrings
 
     """
-     # First coords of line (start + end)
+    # First coords of line (start + end)
     coords = [line.coords[0], line.coords[-1]]
 
     # Add the coords from the points
@@ -129,11 +162,20 @@ def add_points_to_line(line: LineString, points: list[Point], return_ordering=Fa
     dists = [line.project(Point(p)) for p in coords]
 
     # Sort the coords based on the distances
-    coords, ordering = map(list, zip(
-        *[(point, ind) for _, point, ind in sorted(zip(dists, coords, range(len(coords))))]
-    ))
+    coords, ordering = map(
+        list,
+        zip(
+            *[
+                (point, ind)
+                for _, point, ind in sorted(
+                    zip(dists, coords, range(len(coords)))
+                )
+            ]
+        ),
+    )
 
-    ordering.remove(0); ordering.remove(1)
+    ordering.remove(0)
+    ordering.remove(1)
     ordering = [ordering[i] - 2 for i in range(len(ordering))]
 
     # Overwrite old line
@@ -143,5 +185,3 @@ def add_points_to_line(line: LineString, points: list[Point], return_ordering=Fa
         return line, ordering
     else:
         return line
-    
-
