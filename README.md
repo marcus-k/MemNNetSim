@@ -1,9 +1,11 @@
 <h1 align="center">
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/icons/mnns-banner-light.svg" width="500">
-  <img alt="MemNNetSim" src="docs/assets/icons/mnns-banner-dark.svg" width="500">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/marcus-k/MemNNetSim/main/docs/assets/icons/mnns-banner-light.svg" width="500">
+  <img alt="MemNNetSim" src="https://raw.githubusercontent.com/marcus-k/MemNNetSim/main/docs/assets/icons/mnns-banner-dark.svg" width="500">
 </picture>
 </h1>
+
+
 
 MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python package for modelling and analyzing memristive random nanowire networks (NWNs).
 
