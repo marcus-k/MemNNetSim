@@ -129,7 +129,7 @@ def draw_NWN(
 
     Parameters
     ----------
-    NNW : Graph
+    NWN : Graph
         Nanowire network to draw.
 
     figsize : tuple, optional

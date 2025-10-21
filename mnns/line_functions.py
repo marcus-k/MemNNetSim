@@ -99,9 +99,6 @@ def find_intersects(lines: list) -> dict[tuple[int, int], Point]:
     lines : list of LineStrings
         List of the LineStrings to find the intersections of.
 
-    loc : bool
-        Whether or not to return the intersect locations. Defaults to false.
-
     Returns
     -------
     out : dict
