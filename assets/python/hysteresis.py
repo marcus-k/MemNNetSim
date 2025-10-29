@@ -33,10 +33,10 @@ def voltage_func(t):
     f = 1 / T
     phi = np.pi / 2
 
-    # Shifted sine wave
+    # Vertical translated sine wave
     out = V0 * (np.sin(2*np.pi*f*t - phi) + 1) / 2
 
-    # Reverse the sign after t = 2000
+    # Reverse the sign half way through
     out[t > max_time//2] *= -1  
 
     return out

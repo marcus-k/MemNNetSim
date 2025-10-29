@@ -780,10 +780,10 @@
     <span class="n">f</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">T</span>
     <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span>
 
-    <span class="c1"># Shifted sine wave</span>
+    <span class="c1"># Vertical translated sine wave</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">V0</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">f</span><span class="o">*</span><span class="n">t</span> <span class="o">-</span> <span class="n">phi</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
 
-    <span class="c1"># Reverse the sign after t = 2000</span>
+    <span class="c1"># Reverse the sign half way through</span>
     <span class="n">out</span><span class="p">[</span><span class="n">t</span> <span class="o">&gt;</span> <span class="n">max_time</span><span class="o">//</span><span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>  
 
     <span class="k">return</span> <span class="n">out</span>
