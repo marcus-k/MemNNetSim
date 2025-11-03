@@ -29,27 +29,29 @@ or greater is required.
 
 ## Installation from PyPI
 
-Install the latest release of MemNNetSim using pip:
+Install the latest release of MemNNetSim from [PyPI](https://pypi.org/p/mnns) 
+using pip:
 ```bash
 pip install mnns
 ```
 
 ## Installation for development
 
-Download or clone the GitHub repository:
+Download or clone the [GitHub repository](https://github.com/marcus-k/MemNNetSim/):
 ```bash
 git clone https://github.com/marcus-k/MemNNetSim.git
 cd ./MemNNetSim
 ```
 
-Then install the package in editable mode using pip:
+Then install the package in [editable mode](https://setuptools.pypa.io/en/latest/userguide/development_mode.html) 
+using pip:
 ```bash
 pip install -e .[dev]
 ```
 
-To install for editing the documentation, add the `[docs]` optional dependencies:
+To install for editing the documentation, add the `[docs]` [optional dependencies](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies):
 ```bash
-pip install -e .[docs]
+pip install -e .[dev,docs]
 ```
 
 ## Uninstallation
