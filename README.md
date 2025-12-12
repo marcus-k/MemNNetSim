@@ -5,11 +5,7 @@
 </picture>
 </h1>
 
-MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python 
-package for modelling and analyzing memristive random nanowire networks (NWNs).
-This package, developed by Marcus Kasdorf, was initiated from a summer research 
-project in 2021 under the supervision of Dr. Claudia Gomes da Rocha at the 
-University of Calgary.
+MemNNetSim: Memristive Nanowire Network Simulator. A proof-of-concept Python package for modelling and analyzing memristive random nanowire networks (NWNs). This package, developed by Marcus Kasdorf, was initiated from a summer research project in 2021 and continued to be developed under the supervision of Dr. Claudia Gomes da Rocha at the University of Calgary.
 
 # Table of Contents
 * [Installation](#installation)
