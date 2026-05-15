@@ -35,7 +35,7 @@ dev = [
     "black",
 ]
 docs = [
-    "mkdocs",
+    "mkdocs>=1.2.3,<=1.6.1",
     "mkdocstrings[python]",
     "mkdocs-material",
     "mkdocs-api-autonav",
